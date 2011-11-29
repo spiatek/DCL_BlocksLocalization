@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- List of components -->
+
+<Task>
+<Components>
+
+	<!--<ImageSource type="Movie" thread="ImageSourceThread" group="s1">-->
+<!--	<ImageSource type="CameraUniCap" thread="ImageSourceThread" group="s1">				-->
+	<!--	<filename>/home/discode/public_html/datasets/movies_sign/Sign_1_HD.avi</filename>	-->
+	<ImageSource type="Movie" thread="ProcessingThread" group="s1">
+		<filename>/home/spiatek/workspace/DisCODe/doc/movies/mov2.avi</filename>
+	<!--	<filename>/home/spiatek/workspace/DisCODe/build/bin/mov1.avi</filename>			-->
+	<!--	<device></device>
+		<image></image>										-->
+	</ImageSource>
+<!--
+	<CvUndistort type="CvUndistort" thread="ImageSourceThread" group="s1">
+		<cameraMatrix>
+			[3,3](
+				(647.07647705, 0., 383.50000000),
+				(0., 632.76348877, 287.50000000),
+				(0, 0, 1)
+			)
+		</cameraMatrix>
+		<distCoeffs>
+			[1,5](
+				(-0.51084775, 0.23313555, 4.50637517e-03, -6.86281081e-03, 4.94365674e-03)
+			)
+		</distCoeffs>
+	</CvUndistort>
+	
+	<NewestImage type="NewestImage" thread="ProcessingThread" group="s1">
+	</NewestImage>
+
+	<EventTimestamp type="EventTimestamp" thread="ProcessingThread" group="s1">
+	</EventTimestamp>
+-->
+	<ColorConvertion type="CvColorConv" thread="ProcessingThread" group="s1">
+		<type>RGB2HSV</type>
+	</ColorConvertion>
+
+	<ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
+		<hue_min>5</hue_min>
+		<hue_max>16</hue_max>
+		<sat_min>20</sat_min>
+		<sat_max>255</sat_max>
+		<val_min>20</val_min>
+		<val_max>255</val_max>
+	</ThresholdSP>
+
+	<MorphClose type="CvMorphology" thread="ProcessingThread" group="s1">
+		<type>MORPH_CLOSE</type>
+		<iterations>3</iterations>
+	</MorphClose>
+
+	<MorphOpen type="CvMorphology" thread="ProcessingThread" group="s1">
+		<type>MORPH_OPEN</type>
+		<iterations>3</iterations>
+	</MorphOpen>
+
+	<Segmentation type="GrayImageSegmentation" thread="ProcessingThread" group="s1">
+		<minSegmentArea>400</minSegmentArea>
+		<minVariance>5e-3</minVariance>
+	</Segmentation>
+
+	<EdgeDetection type="EdgeDetectorForSegmentedImage" thread="ProcessingThread" group="s1">
+	</EdgeDetection>
+
+	<LineSegments type="LineSegments" thread="ProcessingThread" group="s1">
+	</LineSegments>
+           
+	<FindBlock type="FindBlock" thread="ProcessingThread" group="s1">
+	</FindBlock>
+    	<!--
+	<VisualServoIB type="VisualServoIB" thread="ProcessingThread" group="s1">
+	</VisualServoIB>
+	-->
+	<!--                       
+	<Mrrocpp type="Mrrocpp" thread="MrrocProxyThread" group="s1">
+        	<port>8888</port>
+	</Mrrocpp>
+	-->
+	<!--<PreviewWindow type="CvWindow" thread="PreviewExecutor" group="s1">-->
+	<PreviewWindow type="CvWindow" thread="ProcessingThread" group="s1">
+		<title>Preview</title>
+	</PreviewWindow>
+<!--
+	<Writer type="CvVideoWriter" thread="Exec1" group="s1">
+		<filename>movr1.avi</filename>
+		<fourcc>MJPG</fourcc>
+		<size>640 480</size>
+		<fps>25.0</fps>
+	</Writer>
+    -->         
+</Components>
+
+		
+<!-- Threads of execution -->
+<Executors>
+	<!--
+	<ImageSourceThread type="passive">
+		<main_component>ImageSource</main_component>
+	</ImageSourceThread>
+	-->
+	<ProcessingThread type="passive">
+		<main_component>ImageSource</main_component>
+	</ProcessingThread>
+	<!--
+	<MrrocppProxyThread type="continous">
+		<main_component>Mrrocpp</main_component>
+	</MrrocppProxyThread>
+	-->
+	<!--
+	<PreviewExecutor type="periodic">
+		<main_component>PreviewWindow</main_component>
+		<interval>0.03</interval>	
+	</PreviewExecutor>
+	-->
+</Executors>
+
+
+<!-- Event connections -->
+<Events>
+
+	<Event source="ImageSource.newImage"		destination="ColorConvertion.onNewImage"/>
+<!--	<Event source="ImageSource.newImage"		destination="CvUndistort.onNewImage"/>
+	<Event source="CvUndistort.newUndistortedImage"	destination="NewestImage.onNewImage"/>
+	<Event source="NewestImage.newImage"		destination="EventTimestamp.onEvent"/>
+	<Event source="EventTimestamp.event"		destination="ColorConvertion.onNewImage"/>	-->
+	<Event source="ColorConvertion.newImage"	destination="ThresholdSP.onNewImage"/>
+	<Event source="ThresholdSP.newImage"		destination="MorphClose.onNewImage"/>
+	<Event source="MorphClose.newImage"		destination="MorphOpen.onNewImage"/>
+	<Event source="MorphOpen.newImage"		destination="Segmentation.onNewImage"/>
+	<Event source="Segmentation.segmented"		destination="EdgeDetection.onSegmented"/>
+	<Event source="EdgeDetection.edgesDetected"	destination="LineSegments.onEdgesDetected"/>
+	<Event source="LineSegments.lineSegmentsEstimated"	destination="FindBlock.onLineSegmentsEstimated"/>
+	<Event source="FindBlock.points"		destination="PreviewWindow.onNewImage"/>
+<!--	<Event source="LineSegments.lineSegments"	destination="PreviewWindow.onNewImage"/>	
+	<Event source="FindBlock.blockLocated"		destination="VisualServoIB.onObjectLocated"/>
+	<Event source="FindBlock.blockNotFound"		destination="VisualServoIB.onObjectNotFound"/>	-->
+	<!--<Event source="VisualServoIB.readingReady"	destination="Mrrocpp.onNewReading"/>-->
+	<Event source="ImageSource.newImage"		destination="PreviewWindow.onNewImage"/>
+<!--	<Event source="Movie.newImage"			destination="Writer.onNewImage"/>	-->
+	
+</Events>
+
+
+<!-- Data stream assignments -->
+<DataStreams>
+	
+<!--
+	<Source>
+		<out_img type="out" group="Con1"/>
+	</Source>
+-->
+
+	<ImageSource>
+		<out_img type="out" group="OriginalImage"/>
+	</ImageSource>
+<!--		
+	<CvUndistort>
+		<in_img  type="in" group="OriginalImage"/>
+		<out_img type="out" group="UndistortedImage"/>
+	</CvUndistort>
+
+	<NewestImage>
+		<in_img type="in" group="UndistortedImage"/>
+		<out_img type="out" group="NewestImage"/>
+	</NewestImage>
+
+	<EventTimestamp>
+		<out_timestamp type="out" group="Timestamp"/>
+	</EventTimestamp>
+-->
+	<ColorConvertion>
+		<in_img type="in" group="OriginalImage"/>
+		<out_img type="out" group="ConvertedImage"/>
+	</ColorConvertion>
+
+	<ThresholdSP>
+		<in_img type="in" group="ConvertedImage"/>
+		<out_segments type="out" group="SegmentedImage"/>
+		<out_hue type="out" group="HueImage"/>
+		<out_saturation type="out" group="SaturationImage"/>
+		<out_value type="out" group="ValueImage"/>      
+	</ThresholdSP>
+
+	<MorphClose>
+		<in_img  type="in"  group="SegmentedImage"/>
+		<out_img type="out" group="MorphCloseImage"/>
+	</MorphClose>
+
+	<MorphOpen>
+		<in_img  type="in"  group="MorphCloseImage"/>
+		<out_img type="out" group="MorphOpenImage"/>
+	</MorphOpen>
+	
+	<EdgeDetection>
+		<in_segmented type="in" group="MorphOpenImage"/>
+		<out_edgesDetected type="out" group="EdgesDetected"/>
+	<!--	<out_contours type="out" group="DrawContours"/>			-->
+	</EdgeDetection>
+
+	<LineSegments>
+		<in_edgesDetected type="in" group="EdgesDetected"/>
+		<out_lineSegmentsEstimated type="out" group="LinesEstimated"/>
+	<!--	<out_lineSegments type="out" group="DrawLines"/>		-->
+	</LineSegments>
+
+	<FindBlock>
+		<in_lineSegmentsEstimated type="in" group="LinesEstimated"/>
+<!--		<out_position type="out" group="ImagePosition"/>		-->
+		<out_points type="out" group="DrawPoints"/>
+	</FindBlock>
+<!--
+	<VisualServoIB>
+		<in_position type="in" group="ImagePosition"/>
+		<out_reading type="out" group="reading"/>
+	</VisualServoIB>
+
+	<Mrrocpp>
+		<reading type="in" group="reading"/>
+		<in_timestamp type="in" group="Timestamp"/>
+	</Mrrocpp>
+-->
+	<PreviewWindow>
+		<in_img type="in" group="OriginalImage"/>
+<!--		<in_draw type="in" group="DrawEdges"/>		
+		<in_draw type="in" group="DrawLines"/>		-->
+		<in_draw type="in" group="DrawPoints"/>
+	</PreviewWindow>
+<!--
+	<Writer>
+		<in_img type="in" group="draw"/>
+	</Writer>
+	-->	
+</DataStreams>
+
+</Task>
+
+

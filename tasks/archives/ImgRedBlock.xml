@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Task>
+
+	<!-- List of components -->
+	<Components>
+
+  	<Seq1 type="Sequence" thread="Exec1" group="s1">
+		<directory>/home/spiatek/workspace/DisCODe/doc/images/blocks/black</directory>
+		<triggered>true</triggered>			
+	</Seq1>
+
+	<Kbd1 type="Keyboard" thread="Exec2" group="s1">
+		<keys>t</keys> 
+	</Kbd1>
+
+	<Col2 type="CvColorConv" thread="Exec1" group="s1">
+	<!--	<type>YUV2HSV</type>	-->
+		<type>BGR2HSV</type>
+	</Col2>
+
+	<hsv type="SetHSV" thread="Exec1" group="s1">
+		<hue_min>300</hue_min>
+		<hue_max>360</hue_max>
+		<sat_min>30</sat_min>
+		<sat_max>230</sat_max>
+		<val_min>50</val_min>
+		<val_min>200</val_max>
+	</hsv>
+
+	<Ext1 type="ExtractBlocks" thread="Exec1" group="s1">
+	</Ext1>
+		
+	<MorphClose type="CvMorphology" thread="Exec1" group="s1">
+		<type>MORPH_CLOSE</type>
+		<iterations>3</iterations>
+	</MorphClose>
+
+	<MorphOpen type="CvMorphology" thread="Exec1" group="s1">
+		<type>MORPH_OPEN</type>
+		<iterations>3</iterations>
+	</MorphOpen>
+		
+	<Blob1 type="BlobExtractor" thread="Exec1" group="s1">
+		<min_size>100</min_size>
+	</Blob1>
+
+	<Wnd1 type="CvWindow" thread="Exec3" group="s1">
+		<title>Preview</title>
+	</Wnd1>
+
+ 	</Components>
+
+
+	<!-- Threads of execution -->
+	<Executors>
+	   
+		<Exec1 type="continuous">
+			<main_component>Seq1</main_component>
+		</Exec1>
+
+		<Exec2 type="continuous">
+			<main_component>Kbd1</main_component>
+		</Exec2>
+		
+		<Exec3 type="periodic">
+			<main_component>Wnd1</main_component>
+			<interval>0.2</interval>
+		</Exec3>
+
+	</Executors>
+
+
+	<!-- Event connections -->
+	<Events>
+		<Event source="Kbd1.t_Pressed"      destination="Seq1.onTrigger"/>
+		<Event source="Seq1.newImage"       destination="Col2.onNewImage"/>
+		<Event source="Col2.newImage"       destination="hsv.onNewImage"/>
+		<Event source="hsv.newImage"        destination="MorphClose.onNewImage"/>
+		<Event source="hsv.newImage"        destination="Ext1.onNewImage"/>
+		<Event source="MorphClose.newImage" destination="MorphOpen.onNewImage"/>
+		<Event source="MorphOpen.newImage"  destination="Blob1.onNewImage"/>
+		<Event source="Blob1.newBlobs"      destination="Ext1.onNewBlobs"/>
+		<Event source="Seq1.newImage"       destination="Wnd1.onNewImage"/>
+	</Events>
+
+
+	<!-- Data stream assignments -->
+	<DataStreams>
+
+	<Seq1>
+		<out_img type="out" group="Con1"/>
+	</Seq1>
+
+	<Col2>
+		<in_img  type="in" group="Con1"/>
+		<out_img type="out" group="Con23"/>
+	</Col2>
+
+	<hsv>
+		<in_img type="in" group="Con23"/>
+		<out_segments type="out" group="con_seg"/>
+		<out_hue type="out" group="con_hue"/>
+		<out_saturation type="out" group="con_sat"/>
+		<out_value type="out" group="con_val"/>      
+	</hsv>
+
+	<MorphClose>
+		<in_img  type="in"  group="con_seg"/>
+		<out_img type="out" group="Con3"/>
+	</MorphClose>
+
+	<MorphOpen>
+		<in_img  type="in"  group="Con3"/>
+		<out_img type="out" group="converted"/>
+	</MorphOpen>
+
+	<Blob1>
+		<in_img    type="in"  group="converted"/>
+		<out_blobs type="out" group="blobs"/>
+	</Blob1>
+
+	<Ext1>
+		<in_hue    type="in"  group="con_hue"/>
+		<in_blobs  type="in"  group="blobs"/>
+		<out_blocks type="out" group="draw"/>
+	</Ext1>
+		
+	<Wnd1>
+		<in_img type="in" group="Con1"/>
+		<in_draw type="in" group="draw"/>
+	</Wnd1>
+		
+	</DataStreams>
+
+</Task>
+

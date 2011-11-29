@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Task>
+
+<!-- List of components -->
+<Components>
+
+	<Seq1 type="Sequence" thread="Exec1" group="s1">
+		<directory>/home/spiatek/workspace/DisCODe/doc/images/blocks/black</directory>
+		<triggered>true</triggered>			
+	</Seq1>
+
+	<Kbd1 type="Keyboard" thread="Exec2" group="s1">
+		<keys>t</keys> 
+	</Kbd1>
+
+	<Col2 type="CvColorConv" thread="Exec1" group="s1">
+	<!--	<type>YUV2HSV</type>	-->
+		<type>BGR2HSV</type>
+	</Col2>
+
+	<hsv type="SetHSV" thread="Exec1" group="s1">
+		<hue_min>10</hue_min>
+		<hue_max>40</hue_max>
+		<sat_min>80</sat_min>
+		<sat_max>230</sat_max>
+		<val_min>170</val_min>
+		<val_max>255</val_max>
+	</hsv>
+	
+	<MorphClose type="CvMorphology" thread="Exec1" group="s1">
+		<type>MORPH_CLOSE</type>
+		<iterations>3</iterations>
+	</MorphClose>
+
+	<MorphOpen type="CvMorphology" thread="Exec1" group="s1">
+		<type>MORPH_OPEN</type>
+		<iterations>3</iterations>
+	</MorphOpen>
+		
+	<Segmentation type="GrayImageSegmentation" thread="Exec1" group="s1">
+                <minSegmentArea>400</minSegmentArea>
+                <minVariance>5e-3</minVariance>
+ 	</Segmentation>
+	
+        <EdgeDetection type="EdgeDetectorForSegmentedImage" thread="Exec1" group="s1">
+        </EdgeDetection>
+
+        <LineSegments type="LineSegments" thread="Exec1" group="s1">
+        </LineSegments>
+
+	<Wnd1 type="CvWindow" thread="Exec3" group="s1">
+		<title>Preview</title>
+	</Wnd1>
+             
+</Components>
+		
+		
+<!-- Threads of execution -->
+<Executors>
+	
+	<Exec1 type="continuous">
+		<main_component>Seq1</main_component>
+	</Exec1>
+
+	<Exec2 type="continuous">
+		<main_component>Kbd1</main_component>
+	</Exec2>
+		
+	<Exec3 type="periodic">
+		<main_component>Wnd1</main_component>
+		<interval>0.2</interval>
+	</Exec3>     
+
+</Executors>
+
+
+<!-- Event connections -->
+<Events>
+
+	<Event source="Kbd1.t_Pressed"				destination="Seq1.onTrigger"/>
+	<Event source="Seq1.newImage"				destination="Col2.onNewImage"/>
+	<Event source="Col2.newImage"				destination="hsv.onNewImage"/>
+	<Event source="hsv.newImage"				destination="MorphClose.onNewImage"/>
+	<Event source="MorphClose.newImage"			destination="MorphOpen.onNewImage"/>
+	<Event source="MorphOpen.newImage"              	destination="Segmentation.onNewImage"/>
+	<Event source="Segmentation.segmented"			destination="EdgeDetection.onSegmented"/>
+        <Event source="EdgeDetection.edgesDetected"     	destination="LineSegments.onEdgesDetected"/>
+        <Event source="LineSegments.lineSegmentsEstimated"      destination="Wnd1.onNewImage"/>
+	<Event source="Seq1.newImage"				destination="Wnd1.onNewImage"/>
+	
+</Events>
+
+<!-- Data stream assignments -->
+<DataStreams>
+	
+	<Seq1>
+		<out_img type="out" group="Con1"/>
+	</Seq1>
+
+	<Col2>
+		<in_img  type="in" group="Con1"/>
+		<out_img type="out" group="Con23"/>
+	</Col2>  
+
+	<hsv>
+		<in_img type="in" group="Con23"/>
+		<out_segments type="out" group="con_seg"/>
+		<out_hue type="out" group="con_hue"/>
+		<out_saturation type="out" group="con_sat"/>
+		<out_value type="out" group="con_val"/>      
+	</hsv>
+
+	<MorphClose>
+		<in_img  type="in"  group="con_seg"/>
+		<out_img type="out" group="Con3"/>
+	</MorphClose>
+
+	<MorphOpen>
+		<in_img  type="in"  group="Con3"/>
+		<out_img type="out" group="converted"/>
+	</MorphOpen>
+
+	<Segmentation>
+		<in_img type="in" group="converted"/>
+		<out_segmented type="out" group="segmented"/>
+	</Segmentation>
+
+	<EdgeDetection>
+                <in_segmented type="in" group="segmented"/>
+                <out_edgesDetected type="out" group="EdgesDetected"/>
+                <out_contours type="out" group="DrawContours"/>
+        </EdgeDetection>
+
+        <LineSegments>
+                <in_edgesDetected type="in" group="EdgesDetected"/>
+                <out_lineSegments type="out" group="DrawLines"/>
+        </LineSegments>
+
+	<Wnd1>
+		<in_img type="in" group="con_seg"/>
+	<!--	<in_draw type="in" group="DrawContours"/>
+		<in_draw type="in" group="DrawLines"/>		-->
+	</Wnd1>
+		
+</DataStreams>
+
+</Task>

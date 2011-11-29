@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Task>
+
+<!-- List of components -->
+<Components>
+
+	<ImageSource type="CameraUniCap" thread="ImageSourceThread" group="s1">
+		<device>
+		</device>
+		<image>
+		</image>
+	</ImageSource>
+
+	<CvUndistort type="CvUndistort" thread="ImageSourceThread" group="s1">
+                <cameraMatrix>
+                	[3,3](
+                        	(647.07647705, 0., 383.50000000),
+                                (0., 632.76348877, 287.50000000),
+                                (0, 0, 1)
+                        )
+                </cameraMatrix>
+                <distCoeffs>
+                	[1,5](
+                        	(-0.51084775, 0.23313555, 4.50637517e-03, -6.86281081e-03, 4.94365674e-03)
+                        )
+        	</distCoeffs>
+        </CvUndistort>
+
+	<NewestImage type="NewestImage" thread="ProcessingThread" group="s1">
+        </NewestImage>
+	
+	<ColorConvertion type="CvColorConv" thread="ProcessingThread" group="s1">
+		<type>RGB2HSV</type>
+	</ColorConvertion>
+
+	<ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
+	<!--	<hue_min>5</hue_min>
+		<hue_max>50</hue_max>
+		<sat_min>60</sat_min>
+		<sat_max>255</sat_max>
+		<val_min>170</val_min>
+		<val_max>255</val_max>	-->
+		<hue_min>40</hue_min>
+		<hue_max>170</hue_max>
+		<sat_min>20</sat_min>
+		<sat_max>255</sat_max>
+		<val_min>175</val_min>
+		<val_max>255</val_max>	
+	</ThresholdSP>
+
+	<MorphClose type="CvMorphology" thread="ProcessingThread" group="s1">
+		<type>MORPH_CLOSE</type>
+		<iterations>3</iterations>
+	</MorphClose>
+
+	<MorphOpen type="CvMorphology" thread="ProcessingThread" group="s1">
+		<type>MORPH_OPEN</type>
+		<iterations>3</iterations>
+	</MorphOpen>
+
+	<Segmentation type="GrayImageSegmentation" thread="ProcessingThread" group="s1">
+		<minSegmentArea>400</minSegmentArea>
+		<minVariance>5e-3</minVariance>
+	</Segmentation>
+
+	<EdgeDetection type="EdgeDetectorForSegmentedImage" thread="ProcessingThread" group="s1">
+	</EdgeDetection>
+
+	<LineSegments type="LineSegments" thread="ProcessingThread" group="s1">
+	</LineSegments>
+
+	<FindBlock type="FindBlock" thread="ProcessingThread" group="s1">
+		<len_min>40</len_min>
+		<len_max>200</len_max>
+		<type>get_first</type>
+	</FindBlock>
+	
+	<VisualServoIB type="VisualServoIB" thread="ProcessingThread" group="s1">
+        </VisualServoIB>
+	<!--
+        <Mrrocpp type="Mrrocpp" thread="MrrocProxyThread" group="s1">
+                <port>8888</port>
+        </Mrrocpp>
+	-->	
+	<PreviewWindow type="CvWindow" thread="PreviewExecutor" group="s1">
+		<title>Preview</title>
+	</PreviewWindow>
+
+</Components>
+
+		
+<!-- Threads of execution -->
+<Executors>
+
+        <ImageSourceThread type="passive">
+                <main_component>ImageSource</main_component>
+        </ImageSourceThread>
+
+        <ProcessingThread type="passive">
+                <main_component>NewestImage</main_component>
+        </ProcessingThread>
+<!--
+        <MrrocProxyThread type="continuous">
+                <main_component>Mrrocpp</main_component>
+        </MrrocProxyThread>
+-->
+        <PreviewExecutor type="periodic">
+                <main_component>PreviewWindow</main_component>
+                <interval>0.03</interval>       
+        </PreviewExecutor>
+
+</Executors>
+
+<!-- Event connections -->
+<Events>
+	<Event source="ImageSource.newImage"			destination="CvUndistort.onNewImage"/>
+	<Event source="CvUndistort.newUndistortedImage"		destination="NewestImage.onNewImage"/>
+
+        <Event source="NewestImage.newImage"            	destination="ColorConvertion.onNewImage"/>
+	<Event source="ColorConvertion.newImage"		destination="ThresholdSP.onNewImage"/>
+	<Event source="ThresholdSP.newImage"			destination="MorphClose.onNewImage"/>
+	<Event source="MorphClose.newImage"			destination="MorphOpen.onNewImage"/>
+
+	<Event source="MorphOpen.newImage"			destination="Segmentation.onNewImage"/>
+	<Event source="Segmentation.segmented"			destination="EdgeDetection.onSegmented"/>
+	<Event source="EdgeDetection.edgesDetected"		destination="LineSegments.onEdgesDetected"/>
+	<Event source="LineSegments.lineSegmentsEstimated"	destination="PreviewWindow.onNewImage"/>
+	<Event source="LineSegments.lineSegmentsEstimated"	destination="FindBlock.onLineSegmentsEstimated"/>
+
+	<Event source="FindBlock.blockLocated"          destination="VisualServoIB.onObjectLocated"/>
+        <Event source="FindBlock.blockNotFound"         destination="VisualServoIB.onObjectNotFound"/>
+       <!-- <Event source="VisualServoIB.readingReady"  	destination="Mrrocpp.onRpcResult"/> -->
+	<Event source="FindBlock.blockLocated"		destination="PreviewWindow.onNewImage"/>
+
+	<Event source="NewestImage.newImage"		destination="PreviewWindow.onNewImage"/>
+	
+</Events>
+
+
+<!-- Data stream assignments -->
+<DataStreams>
+	
+	<ImageSource>
+		<out_img type="out" group="OriginalImage"/>
+	</ImageSource>
+
+	<CvUndistort>
+		<in_img type="in" group="OriginalImage"/>
+		<out_img type="out" group="UndistortedImage"/>
+	</CvUndistort>
+
+	<NewestImage>
+                <in_img type="in" group="UndistortedImage"/>
+                <out_img type="out" group="NewestImage"/>
+        </NewestImage>
+
+	<ColorConvertion>
+		<in_img type="in" group="NewestImage"/>
+		<out_img type="out" group="ConvertedImage"/>
+	</ColorConvertion>
+
+	<ThresholdSP>
+		<in_img type="in" group="ConvertedImage"/>
+		<out_segments type="out" group="SImage"/>
+		<out_hue type="out" group="HueImage"/>
+		<out_saturation type="out" group="SaturationImage"/>
+		<out_value type="out" group="ValueImage"/>      
+	</ThresholdSP>
+
+	<MorphClose>
+		<in_img type="in" group="SImage"/>
+		<out_img type="out" group="MorphCloseImage"/>
+	</MorphClose>
+
+	<MorphOpen>
+		<in_img type="in" group="MorphCloseImage"/>
+		<out_img type="out" group="MorphOpenImage"/>
+	</MorphOpen>
+	
+	<Segmentation>
+		<in_img type="in" group="MorphOpenImage"/>
+		<out_segmented type="out" group="SegmentedImage"/>
+	</Segmentation>
+
+	<EdgeDetection>
+		<in_segmented type="in" group="SegmentedImage"/>
+		<out_edgesDetected type="out" group="EdgesDetected"/>
+	<!--	<out_contours type="out" group="DrawLines"/>		-->
+	</EdgeDetection>
+
+	<LineSegments>
+		<in_edgesDetected type="in" group="EdgesDetected"/>
+		<out_lineSegmentsEstimated type="out" group="LinesEstimated"/>
+	<!--	<out_lineSegments type="out" group="DrawLines"/>	-->
+	</LineSegments>
+
+	<FindBlock>
+		<in_lineSegmentsEstimated type="in" group="LinesEstimated"/>
+		<!--<out_points type="out" group="DrawPoints"/>	-->
+		<out_lines type="out" group="DrawLines"/>
+		<out_imagePosition type="out" group="ImagePosition"/>
+	</FindBlock>
+
+	<VisualServoIB>
+                <in_position type="in" group="ImagePosition"/>
+        <!--        <out_reading type="out" group="reading"/> -->
+        </VisualServoIB>
+<!--
+        <Mrrocpp>
+                <reading type="in" group="reading"/>
+        </Mrrocpp>
+-->
+	<PreviewWindow>
+		<in_img type="in" group="NewestImage"/>
+	<!--	<in_draw type="in" group="DrawPoints"/>	-->
+		<in_draw type="in" group="DrawLines"/>
+	</PreviewWindow>
+
+</DataStreams>
+</Task>

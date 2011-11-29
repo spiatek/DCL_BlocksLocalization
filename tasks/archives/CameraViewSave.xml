@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Task>
+	<!-- List of components -->
+	<Components>
+		<Source type="CameraUniCap" thread="Thread1" group="s1">
+			<device>
+
+			</device>
+
+			<image>
+
+			</image>
+		</Source>
+
+		<Window type="CvWindow" thread="Thread1" group="s1">
+			<title>Preview</title>
+		</Window>
+
+		<Writer type="CvVideoWriter" thread="Thread1" group="s1">
+			<filename>mov2.avi</filename>
+			<fourcc>MJPG</fourcc>
+			<size>640 480</size>
+			<fps>25.0</fps>
+		</Writer>
+
+	</Components>
+
+	<!-- Threads of execution -->
+	<Executors>
+		<Thread1 type="continuous">
+			<main_component>Source</main_component>
+		</Thread1>
+	</Executors>
+
+	<!-- Event connections -->
+	<Events>
+		<Event source="Source.newImage" destination="Window.onNewImage"/>
+		<Event source="Source.newImage" destination="Writer.onNewImage"/>
+	</Events>
+
+	<!-- Data stream assignments -->
+	<DataStreams>
+		<Source>
+			<out_img type="out" group="Con"/>
+		</Source>
+
+		<Window>
+			<in_img type="in" group="Con"/>
+		</Window>
+
+		<Writer>
+			<in_img type="in" group="Con"/>
+		</Writer>
+	</DataStreams>
+
+</Task>

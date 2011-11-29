@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Task>
+
+<!-- List of components -->
+<Components>
+
+	<Movie type="Movie" thread="Exec1" group="s1">
+	<!--	<filename>/home/discode/public_html/datasets/movies_sign/Sign_1_HD.avi</filename>	-->
+		<filename>/home/spiatek/workspace/DisCODe/doc/movies/mov1.avi</filename>
+	<!--	<filename>/home/spiatek/workspace/DisCODe/build/bin/mov1.avi</filename>			-->
+	</Movie>
+
+<!--
+	<Source type="CameraUniCap" thread="Thread1" group="s1">
+		<device>
+		</device>
+		<image>
+		</image>
+	</Source>
+-->
+
+	<Col2 type="CvColorConv" thread="Exec1" group="s1">
+	<!--	<type>YUV2HSV</type>	-->
+		<type>BGR2HSV</type>
+	</Col2>
+
+	<hsv type="SetHSV" thread="Exec1" group="s1">	
+		<hue_min>120</hue_min>
+		<hue_max>180</hue_max>
+		<sat_min>130</sat_min>
+		<sat_max>255</sat_max>
+		<val_min>45</val_min>
+		<val_min>255</val_max>
+	</hsv>
+
+	<Ext1 type="ExtractBlocks" thread="Exec1" group="s1">
+	</Ext1>
+		
+	<MorphClose type="CvMorphology" thread="Exec1" group="s1">
+		<type>MORPH_CLOSE</type>
+		<iterations>10</iterations>
+	</MorphClose>
+
+	<MorphOpen type="CvMorphology" thread="Exec1" group="s1">
+		<type>MORPH_OPEN</type>
+		<iterations>10</iterations>
+	</MorphOpen>
+		
+	<Blob1 type="BlobExtractor" thread="Exec1" group="s1">
+		<min_size>100</min_size>
+	</Blob1>
+
+	<Wnd1 type="CvWindow" thread="Exec1" group="s1">
+		<title>Preview</title>
+	</Wnd1>
+<!--
+	<Writer type="CvVideoWriter" thread="Exec1" group="s1">
+		<filename>movr1.avi</filename>
+		<fourcc>MJPG</fourcc>
+		<size>640 480</size>
+		<fps>25.0</fps>
+	</Writer>
+    -->         
+</Components>
+
+		
+<!-- Threads of execution -->
+<Executors>
+	
+	<Exec1 type="continuous">
+		<main_component>Movie</main_component>
+		<iterations>1000</iterations>
+	</Exec1>
+	
+</Executors>
+
+
+<!-- Event connections -->
+<Events>
+
+<!--	<Event source="Kbd1.t_Pressed"		destination="Seq1.onTrigger"/>		-->
+	<Event source="Movie.newImage"		destination="Col2.onNewImage"/>
+	<Event source="Col2.newImage"		destination="hsv.onNewImage"/>
+	<Event source="hsv.newImage"		destination="MorphClose.onNewImage"/>
+	<Event source="hsv.newImage"		destination="Ext1.onNewImage"/>
+	<Event source="MorphClose.newImage"	destination="MorphOpen.onNewImage"/>
+	<Event source="MorphOpen.newImage"	destination="Blob1.onNewImage"/>
+	<Event source="Blob1.newBlobs"		destination="Ext1.onNewBlobs"/>
+	<Event source="Movie.newImage"		destination="Wnd1.onNewImage"/>
+<!--	<Event source="Movie.newImage"		destination="Writer.onNewImage"/>	-->
+	
+</Events>
+
+
+<!-- Data stream assignments -->
+<DataStreams>
+	
+<!--
+	<Source>
+		<out_img type="out" group="Con1"/>
+	</Source>
+-->
+
+	<Movie>
+		<out_img type="out" group="Con1"/>
+	</Movie>
+				
+	<Col2>
+		<in_img  type="in" group="Con1"/>
+		<out_img type="out" group="Con23"/>
+	</Col2>
+
+	<hsv>
+		<in_img type="in" group="Con23"/>
+		<out_segments type="out" group="con_seg"/>
+		<out_hue type="out" group="con_hue"/>
+		<out_saturation type="out" group="con_sat"/>
+		<out_value type="out" group="con_val"/>      
+	</hsv>
+
+	<MorphClose>
+		<in_img  type="in"  group="con_seg"/>
+		<out_img type="out" group="Con3"/>
+	</MorphClose>
+
+	<MorphOpen>
+		<in_img  type="in"  group="Con3"/>
+		<out_img type="out" group="converted"/>
+	</MorphOpen>
+
+	<Blob1>
+		<in_img    type="in"  group="converted"/>
+		<out_blobs type="out" group="blobs"/>
+	</Blob1>
+
+	<Ext1>
+		<in_hue    type="in"  group="con_hue"/>
+		<in_blobs  type="in"  group="blobs"/>
+		<out_blocks type="out" group="draw"/>
+	</Ext1>
+		
+	<Wnd1>
+		<in_img type="in" group="Con1"/>
+		<in_draw type="in" group="draw"/>
+	</Wnd1>
+<!--
+	<Writer>
+		<in_img type="in" group="draw"/>
+	</Writer>
+	-->	
+</DataStreams>
+
+</Task>
+
+
