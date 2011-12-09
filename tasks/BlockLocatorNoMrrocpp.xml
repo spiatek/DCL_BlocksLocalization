@@ -36,38 +36,50 @@
     	<blue>
 			[3,2](
 				(0, 16),
-				(20, 255),
-				(40, 200)
+				(220, 255),
+				(150, 255)
 			)
 		</blue>
 		<red>
 			[3,2](
 				(120, 180),
 				(130, 255),
-				(45, 255)
+				(100, 255)
 			)
 		</red>
 		<green>
 			[3,2](
 				(45, 62),
-				(130, 255),
-				(30, 255)
+				(180, 255),
+				(30, 180)
 			)		
 		</green>
 		<yellow>
 			[3,2](
-				(40, 170),
-				(220, 255),
+				(40, 100),
+				(20, 255),
 				(200, 255)
 			)				
 		</yellow>
+		<!--[3,2](
+				(40, 100),
+				(20, 255),
+				(200, 255)
+			)	-->
 		<other>
+			[3,2](
+				(120, 180),
+				(130, 255),
+				(100, 255)
+			)				
+		</other>		
+		<!--<other>
 			[3,2](
 				(80, 110),
 				(20, 255),
 				(40, 255)
 			)		
-		</other>
+		</other>-->
     </ThresholdSP>
     
     <MorphClose type="CvMorphology" thread="ProcessingThread" group="s1">
@@ -144,7 +156,7 @@
 	    <Event source="FindBlock.blockLocated"			destination="VisualServoIB.onObjectLocated"/>
 	    <Event source="FindBlock.blockNotFound"			destination="VisualServoIB.onObjectNotFound"/>
 	    
-	   	<Event source="NewestImage.newImage"			destination="PreviewWindow.onNewImage"/>
+	   	<Event source="ThresholdSP.newImage"			destination="PreviewWindow.onNewImage"/>
 	
 	</Events>
   
@@ -220,7 +232,7 @@
 	    <PreviewWindow>
 	    	<!--<in_img type="in" group="HueImage"/>-->
 	    	<!--<in_img type="in" group="SaturationImage"/>-->
-	    	<in_img type="in" group="NewestImage"/>
+	    	<in_img type="in" group="ThresholdedImage"/>
 	    	<!--	<in_draw type="in" group="DrawPoints"/>	-->
 	    	<in_draw type="in" group="DrawLines"/>
 	    </PreviewWindow>

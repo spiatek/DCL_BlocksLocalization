@@ -25,12 +25,16 @@ namespace FindBlock {
 struct FindBlock_Props: public Base::Props
 {
 
+	int d;
+	int timeout;
 	int len_min;
 	int len_max;
 	string type;
 
 	void load(const ptree & pt)
 	{
+		d = pt.get("d",0.031);
+		timeout = pt.get("timeout",150);
 		len_min = pt.get("len_min",30);
 		len_max = pt.get("len_max",300);
 		type = pt.get("type","get_first");
@@ -38,6 +42,8 @@ struct FindBlock_Props: public Base::Props
 
 	void save(ptree & pt)
 	{
+		pt.put("d", d);
+		pt.put("timeout", timeout);
 		pt.put("len_min", len_min);
 		pt.put("len_max", len_max);
 		pt.put("type", type);
@@ -107,6 +113,9 @@ private:
 
         /** Raised when block has not been found on the image. */
         Base::Event* blockNotFound;
+
+        double prev_gamma;
+        int counter;
 
     	FindBlock_Props props;
 };

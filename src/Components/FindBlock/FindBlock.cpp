@@ -7,11 +7,18 @@
 
 #include <memory>
 #include <string>
+#include <cmath>
 
 #include "FindBlock.hpp"
 #include "Common/Logger.hpp"
 
-size_t line_length(Types::Line*);
+//#define BLOCK_WIDTH 0.031
+
+#define A 1655
+#define B 1.4675
+#define C -0.9837
+
+//size_t line_length(Types::Line*);
 
 namespace Processors {
 namespace FindBlock {
@@ -44,6 +51,10 @@ bool FindBlock_Processor::onInit()
 
         blockLocated = registerEvent("blockLocated");
         blockNotFound = registerEvent("blockNotFound");
+
+        prev_gamma = 0;
+        counter = props.timeout+1;
+
         return true;
 }
 
@@ -73,7 +84,7 @@ bool FindBlock_Processor::onStart()
 void FindBlock_Processor::onLineSegmentsEstimated()
 {
 	LOG(LTRACE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
-	LOG(LNOTICE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
+	//LOG(LNOTICE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
 
 	try {
 
@@ -93,6 +104,15 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 		size_t l_min = props.len_min;
 		size_t l_max = props.len_max;
 		string type = props.type;
+
+		int d = props.d;
+
+		if(counter > 0) {
+			counter -= 1;
+		}
+		else {
+			counter = props.timeout;
+		}
 
 		//Local vectors
 		std::vector<Types::Segmentation::Segment> active_blocks;	//vector for active segments (after filtration)
@@ -148,7 +168,6 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 						//Draw lines connecting segment's center with image center
 						dc.add(line_abs);
 
-
 						//Compute a radian between block's contour and optic axis of a camera
 						long double y;
 						if((p2.x > p1.x && p2.y < p1.y) || (p1.x > p2.x && p1.y < p2.y)) {
@@ -176,14 +195,51 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 			double maxPixels = std::max(si.image.size().width, si.image.size().height);
 
 			//Compute average of segment rotations
-			double sumg = 0.0, im_g = 0.0;
+			double im_g = 0.0, lowest = M_PI, rr = M_PI, nearest = M_PI;
+
 			for(size_t z = 0; z < ys.size(); ++z) {
-				sumg = sumg + (double) ys[z];
+
+				double it_r, act_min = M_PI, nearest_0 = M_PI, act_gamma;
+
+				//LOG(LNOTICE) << "Prev gamma: " << prev_gamma << "\n";
+				//LOG(LNOTICE) << "Mozliwe wartosci kata: ";
+				for(int i = -3; i < 4; ++i) {
+					double act_r = ys[z] + i*M_PI/2;
+					//LOG(LNOTICE) << act_r << " ";
+					it_r = abs(act_r - prev_gamma);
+					if(it_r < act_min) {
+						act_min = it_r;
+						act_gamma = act_r;
+					}
+					if(abs(act_r) < nearest) {
+						nearest = act_r;
+					}
+				}
+				//LOG(LNOTICE) << "\n";
+
+				ys[z] = act_gamma;
+
+				if(act_min < lowest) {
+					lowest = act_min;
+					rr = act_gamma;
+				}
 			}
+
 			if(ys.size() > 0) {
-				im_g = sumg/ys.size();
+
+				if(counter == props.timeout+1) {
+					im_g = nearest;
+				}
+				else {
+					im_g = rr;
+				}
+				prev_gamma = im_g;
+
 			}
 			//cout << im_g << endl;
+
+			//Compute distance between block and camera
+			double im_z = C + A/(B + d);
 
 			//Compute servo X, Y parameters
 			int im_x = 0, im_y = 0;

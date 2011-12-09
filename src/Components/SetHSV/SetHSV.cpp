@@ -163,7 +163,7 @@ void SetHSV_Processor::onNewImage()
 		out_value.write(value_img);
 		out_threshold.write(threshold_img);
 
-		LOG(LNOTICE) << "onNewImage(): end\n";
+		//LOG(LNOTICE) << "onNewImage(): end\n";
 
 		newImage->raise();
 	}
@@ -187,7 +187,6 @@ void SetHSV_Processor::onRpcCall()
 
 	try {
 
-		//TODO: bug - onRpcCall doesn't work when color is set
 		color = UNLOADED;
 		counter = 0;
 

@@ -16,7 +16,7 @@
 	</ColorConvertion>
 
 	<ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
-		<resetOption>0</resetOption>
+		<resetOption>1</resetOption>
 		<countMax>250</countMax>
 		<blue>
 			[3,2](
@@ -85,10 +85,14 @@
 	<VisualServoIB type="VisualServoIB" thread="ProcessingThread" group="s1">
 	</VisualServoIB>
 
-	<Mrrocpp_Proxy type="Mrrocpp" thread="MrrocppThread" group="s1">
-		<port>8888</port>
+	<Mrrocpp_Proxy type="Mrrocpp" thread="MrrocppProxyThread" group="s1">
+		<port>8887</port>
 	</Mrrocpp_Proxy>
 
+	<Mrrocpp type="Mrrocpp" thread="MrrocppThread" group="s1">
+		<port>8888</port>
+	</Mrrocpp>
+	
 	<PreviewWindow type="CvWindow" thread="PreviewExecutor" group="s1">
 		<title>Preview</title>
 	</PreviewWindow>
@@ -103,10 +107,14 @@
 		<main_component>ImageSource</main_component>
 	</ProcessingThread>
 
-	<MrrocppThread type="continuous">
+	<MrrocppProxyThread type="continuous">
 		<main_component>Mrrocpp_Proxy</main_component>
-	</MrrocppThread>
+	</MrrocppProxyThread>
 
+	<MrrocppThread type="continuous">
+		<main_component>Mrrocpp</main_component>
+	</MrrocppThread>
+	
 	<PreviewExecutor type="periodic">
 		<main_component>PreviewWindow</main_component>
 		<interval>0.001</interval>       
@@ -157,6 +165,10 @@
 		<rpcParam type="out" group="rpcCall"/>
 	</Mrrocpp_Proxy>
 
+	<Mrrocpp>
+		<reading type="in" group="reading"/>
+	</Mrrocpp>
+	
 	<ColorConvertion>
 		<in_img type="in" group="OriginalImage"/>
 		<out_img type="out" group="ConvertedImage"/>

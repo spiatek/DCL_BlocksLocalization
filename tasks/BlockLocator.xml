@@ -31,33 +31,33 @@
     </ColorConvertion>
     
     <ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
-		<resetOption>0</resetOption>
-		<countMax>250</countMax>
+        <resetOption>1</resetOption>
+		<countMax>200</countMax>
     	<blue>
 			[3,2](
 				(0, 16),
-				(20, 255),
-				(40, 200)
+				(220, 255),
+				(150, 255)
 			)
 		</blue>
 		<red>
 			[3,2](
 				(120, 180),
 				(130, 255),
-				(45, 255)
+				(100, 255)
 			)
 		</red>
 		<green>
 			[3,2](
 				(45, 62),
-				(130, 255),
-				(30, 255)
+				(180, 255),
+				(30, 180)
 			)		
 		</green>
 		<yellow>
 			[3,2](
-				(40, 170),
-				(220, 255),
+				(40, 100),
+				(20, 255),
 				(200, 255)
 			)				
 		</yellow>
@@ -92,7 +92,8 @@
 	</LineSegments>
     
 	<FindBlock type="FindBlock" thread="ProcessingThread" group="s1">
-    	<len_min>40</len_min>
+    	<timeout>150</timeout>
+		<len_min>40</len_min>
     	<len_max>200</len_max>
     	<type>get_first</type>
     </FindBlock>
