@@ -32,31 +32,31 @@
     
     <ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
         <resetOption>1</resetOption>
-		<countMax>200</countMax>
+		<countMax>150</countMax>
     	<blue>
 			[3,2](
-				(0, 16),
+				(5, 16),
 				(220, 255),
-				(150, 255)
+				(100, 255)
 			)
 		</blue>
 		<red>
 			[3,2](
 				(120, 180),
 				(130, 255),
-				(100, 255)
+				(70, 255)
 			)
 		</red>
 		<green>
 			[3,2](
-				(45, 62),
-				(180, 255),
-				(30, 180)
+				(42, 64),
+				(130, 255),
+				(40, 255)
 			)		
 		</green>
 		<yellow>
 			[3,2](
-				(40, 100),
+				(40, 110),
 				(20, 255),
 				(200, 255)
 			)				

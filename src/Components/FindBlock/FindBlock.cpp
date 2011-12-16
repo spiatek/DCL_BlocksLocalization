@@ -147,11 +147,17 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 					sum_x += (p1.x + p2.x);
 					sum_y += (p1.y + p2.y);
 				}
+
+
 			}
+			cout << endl;
 
 			//Get only segments consisted of four lines
 			if(indexes.size() == 4 && wo == 0)
 			{
+
+				cout << "Segment: " << lines->size() << endl;
+
 				//Compute segment's center coordinates
 				cv::Point* pos_abs = new cv::Point(sum_x/(2*indexes.size()),sum_y/(2*indexes.size()));
 				Types::Line* line_abs = new Types::Line(*pos_abs, *pos_centr);
@@ -163,7 +169,11 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 					cv::Point p2 = ((*lines)[j]).getP2();
 					l_length = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 
+
+
 					if(l_length > l_min && l_length < l_max) {
+
+						cout << l_length << "(" <<p1.x<<", "<<p1.y<<" | "<<p2.x<<", "<<p2.y<< "), ";
 
 						//Draw lines connecting segment's center with image center
 						dc.add(line_abs);
@@ -180,6 +190,7 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 					}
 
 				}
+				cout << endl;
 
 				//Add segment to image's vector of blocks
 				active_blocks.push_back(si.segments[i]);

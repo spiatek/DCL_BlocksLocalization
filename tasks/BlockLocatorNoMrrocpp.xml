@@ -68,9 +68,9 @@
 			)	-->
 		<other>
 			[3,2](
-				(120, 180),
-				(130, 255),
-				(100, 255)
+				(30, 110),
+				(0, 255),
+				(80, 255)
 			)				
 		</other>		
 		<!--<other>
@@ -104,8 +104,8 @@
 	</LineSegments>
     
 	<FindBlock type="FindBlock" thread="ProcessingThread" group="s1">
-    	<len_min>40</len_min>
-    	<len_max>200</len_max>
+    	<len_min>100</len_min>
+    	<len_max>400</len_max>
     	<type>get_first</type>
     </FindBlock>
     
@@ -156,7 +156,7 @@
 	    <Event source="FindBlock.blockLocated"			destination="VisualServoIB.onObjectLocated"/>
 	    <Event source="FindBlock.blockNotFound"			destination="VisualServoIB.onObjectNotFound"/>
 	    
-	   	<Event source="ThresholdSP.newImage"			destination="PreviewWindow.onNewImage"/>
+	   	<Event source="NewestImage.newImage"			destination="PreviewWindow.onNewImage"/>
 	
 	</Events>
   
@@ -214,12 +214,12 @@
 	    <LineSegments>
 	    	<in_edgesDetected type="in" group="EdgesDetected"/>
 	    	<out_lineSegmentsEstimated type="out" group="LinesEstimated"/>
-	   		<!--	<out_lineSegments type="out" group="DrawLines"/>	-->
+	   		<!--<out_lineSegments type="out" group="DrawLines"/>-->
 	    </LineSegments>
 	    
 	    <FindBlock>
 	    	<in_lineSegmentsEstimated type="in" group="LinesEstimated"/>
-	    	<!--<out_points type="out" group="DrawPoints"/>	-->
+	    	<!--<out_points type="out" group="DrawPoints"/>-->
 	    	<out_lines type="out" group="DrawLines"/>
 	    	<out_imagePosition type="out" group="ImagePosition"/>
 	    </FindBlock>
@@ -232,8 +232,9 @@
 	    <PreviewWindow>
 	    	<!--<in_img type="in" group="HueImage"/>-->
 	    	<!--<in_img type="in" group="SaturationImage"/>-->
-	    	<in_img type="in" group="ThresholdedImage"/>
-	    	<!--	<in_draw type="in" group="DrawPoints"/>	-->
+	    	<!--<in_img type="in" group="ValueImage"/>-->
+	    	<in_img type="in" group="NewestImage"/>
+	    	<!--<in_draw type="in" group="DrawPoints"/>-->
 	    	<in_draw type="in" group="DrawLines"/>
 	    </PreviewWindow>
     
