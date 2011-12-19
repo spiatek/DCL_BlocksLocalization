@@ -17,7 +17,7 @@
 
 	<ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
 		<resetOption>1</resetOption>
-		<countMax>250</countMax>
+		<timeout>40</timeout>
 		<blue>
 			[3,2](
 				(0, 16),
@@ -46,6 +46,13 @@
 				(200, 255)
 			)				
 		</yellow>
+		<board>
+			[3,2](
+				(30, 110),
+				(0, 255),
+				(80, 255)
+			)
+		</board>
 		<other>
 			[3,2](
 				(80, 110),

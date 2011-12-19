@@ -8,9 +8,9 @@
 #define	RED	2
 #define GREEN 3
 #define YELLOW 4
+#define BOARD 5
 
-//TODO: create new DCL containing SetHSV and FindBlock
-
+#include <time.h>
 #include <memory>
 #include <boost/thread.hpp>
 #include "Common/xdr/xdr_iarchive.hpp"
@@ -59,8 +59,10 @@ bool SetHSV_Processor::onInit()
 	registerStream("out_value", &out_value);
 	registerStream("out_threshold", &out_threshold);
 
+	do_reset = (props.reset == 1) ? true : false;
+	timeout = (double) props.timeout;
+	condition_met = true;
 	color = UNLOADED;
-	counter = 0;
 
 	return true;
 }
@@ -90,27 +92,20 @@ bool SetHSV_Processor::onStart()
 void SetHSV_Processor::onNewImage()
 {
 
-	int do_reset = props.reset;
-	int cmax = props.count_max;
-
-	counter++;
-
-	if(counter > cmax) {
-		LOG(LNOTICE) << "Counter reset" << "\n";
-		color = UNLOADED;
-		counter = 0;
-	}
-
-	if(do_reset == 1 && color == UNLOADED) {
-		//LOG(LERROR) << "onNewImage(): undefined color\n";
+	if(do_reset && condition_met) {
 		return;
+	}
+	else if(color == UNLOADED) {
+		params = props.other_params;
 	}
 	else {
 		LOG(LNOTICE) << "onNewImage(): color " << color << "\n";
 	}
 
-	if(color == UNLOADED) {
-		params = props.other_params;
+	if(get_time_s() - start_time >= timeout) {
+		condition_met = true;
+		color = UNLOADED;
+		LOG(LNOTICE) << "Timeout condition met" << "\n";
 	}
 
 	try {
@@ -188,7 +183,8 @@ void SetHSV_Processor::onRpcCall()
 	try {
 
 		color = UNLOADED;
-		counter = 0;
+		condition_met = false;
+		start_time = get_time_s();
 
 		Types::Mrrocpp_Proxy::BReading br;
 
@@ -209,6 +205,9 @@ void SetHSV_Processor::onRpcCall()
 		}
 		else if(color == YELLOW) {
 			params = props.yellow_params;
+		}
+		else if(color == BOARD) {
+			params = props.board_params;
 		}
 		else {
 			LOG(LERROR) << "onRpcCall(): undefined color" << endl;
@@ -234,6 +233,18 @@ void SetHSV_Processor::onRpcCall()
 	catch (...) {
 		LOG(LERROR) << "SetHSV_Processor::onRpcCall failed\n";
 	}
+
+}
+
+double SetHSV_Processor::get_time_s()
+{
+	struct timespec current_time;
+
+	if (clock_gettime(CLOCK_REALTIME, &current_time) == -1) {
+		LOG(LERROR) << "SetHSV_Processor::get_time_s failed\n";
+	}
+
+	return current_time.tv_sec + ((double) current_time.tv_nsec) * 1e-9;
 
 }
 

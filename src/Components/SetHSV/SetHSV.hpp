@@ -7,6 +7,7 @@
 #define SETHSV_PROCESSOR_HPP_
 
 #include <cv.h>
+#include <time.h>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
@@ -36,10 +37,11 @@ struct SetHSV_Props: public Base::Props
 	cv::Mat red_params;
 	cv::Mat green_params;
 	cv::Mat yellow_params;
+	cv::Mat board_params;
 	cv::Mat other_params;
  
 	int reset;
-	int count_max;
+	int timeout;
 
 	/*!
 	 * \copydoc Base::Props::load
@@ -49,7 +51,7 @@ struct SetHSV_Props: public Base::Props
 		cout << "Loading properties..." << endl;
 
 		reset = pt.get("resetOption", 1);
-		count_max = pt.get("countMax", 250);
+		timeout = pt.get("timeout", 250);
 
 		boost::numeric::ublas::matrix <double> blueMatrixUblas = str2mat(pt.get <std::string> ("blue"), 3, 2);
 		blue_params = cv::Mat(3, 2, CV_32F);
@@ -84,6 +86,14 @@ struct SetHSV_Props: public Base::Props
 			}
 		}
 
+		boost::numeric::ublas::matrix <double> boardMatrixUblas = str2mat(pt.get <std::string> ("board"), 3, 2);
+		board_params = cv::Mat(3, 2, CV_32F);
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				board_params.at <float> (i, j) = boardMatrixUblas(i, j);
+			}
+		}
+
 		boost::numeric::ublas::matrix <double> otherMatrixUblas = str2mat(pt.get <std::string> ("other"), 3, 2);
 		other_params = cv::Mat(3, 2, CV_32F);
 		for (int i = 0; i < 3; ++i) {
@@ -99,7 +109,7 @@ struct SetHSV_Props: public Base::Props
 	void save(ptree & pt)
 	{
 		pt.put("resetOption", reset);
-		pt.put("countMax", count_max);
+		pt.put("timeout", timeout);
 	}
 
 };
@@ -166,6 +176,8 @@ protected:
 	 */
 	void onRpcCall();
 
+	double get_time_s();
+
 	Base::EventHandler <SetHSV_Processor> h_onNewImage;
 	Base::EventHandler <SetHSV_Processor> h_onRpcCall;
 
@@ -196,7 +208,9 @@ private:
 
 	cv::Mat params;
 	uint32_t color;
-	uint32_t counter;
+
+	double start_time, timeout;
+	bool condition_met, do_reset;
 };
 
 }//: namespace SetHSV
