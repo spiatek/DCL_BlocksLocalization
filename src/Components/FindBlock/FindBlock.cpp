@@ -12,6 +12,7 @@
 #include "FindBlock.hpp"
 #include "Common/Logger.hpp"
 
+#define BOARD_COLOR 5
 //#define BLOCK_WIDTH 0.031
 
 #define A 1655
@@ -44,7 +45,12 @@ bool FindBlock_Processor::onInit()
         h_onLineSegmentsEstimated.setup(this, &FindBlock_Processor::onLineSegmentsEstimated);
         registerHandler("onLineSegmentsEstimated", &h_onLineSegmentsEstimated);
 
+        h_onNewColor.setup(this, &FindBlock_Processor::onNewColor);
+        registerHandler("onNewColor", &h_onNewColor);
+
+        registerStream("in_color", &in_color);
         registerStream("in_lineSegmentsEstimated", &in_lineSegmentsEstimated);
+
         registerStream("out_imagePosition", &out_imagePosition);
         registerStream("out_points", &out_points);
         registerStream("out_lines", &out_lines);
@@ -54,6 +60,7 @@ bool FindBlock_Processor::onInit()
 
         prev_gamma = 0;
         counter = props.timeout+1;
+        block_color = BOARD_COLOR;
 
         return true;
 }
@@ -81,6 +88,14 @@ bool FindBlock_Processor::onStart()
         return true;
 }
 
+
+void FindBlock_Processor::onNewColor()
+{
+	LOG(LTRACE) << "FindBlock_Processor::onNewColor()\n";
+
+	block_color = in_color.read();
+}
+
 void FindBlock_Processor::onLineSegmentsEstimated()
 {
 	LOG(LTRACE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
@@ -90,6 +105,7 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 
 		//Input and output types and containers
 		Types::Segmentation::SegmentedImage si = in_lineSegmentsEstimated.read();
+
 		Types::ImagePosition imagePosition;
 		Types::DrawableContainer dc;
 		Types::DrawableContainer ol;
@@ -101,11 +117,19 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 		cv::Point* pos_centr = new cv::Point(si_cols/2, si_rows/2);
 
 		//Get filtration parameters from xml file
-		size_t l_min = props.len_min;
-		size_t l_max = props.len_max;
-		string type = props.type;
+		size_t l_min, l_max;
+
+		if(block_color == BOARD_COLOR) {
+			l_min = props.len_min_b;
+			l_max = props.len_max_b;
+		}
+		else {
+			l_min = props.len_min;
+			l_max = props.len_max;
+		}
 
 		int d = props.d;
+		string type = props.type;
 
 		if(counter > 0) {
 			counter -= 1;
@@ -150,13 +174,10 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 
 
 			}
-			cout << endl;
 
 			//Get only segments consisted of four lines
 			if(indexes.size() == 4 && wo == 0)
 			{
-
-				cout << "Segment: " << lines->size() << endl;
 
 				//Compute segment's center coordinates
 				cv::Point* pos_abs = new cv::Point(sum_x/(2*indexes.size()),sum_y/(2*indexes.size()));
@@ -169,11 +190,7 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 					cv::Point p2 = ((*lines)[j]).getP2();
 					l_length = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 
-
-
 					if(l_length > l_min && l_length < l_max) {
-
-						cout << l_length << "(" <<p1.x<<", "<<p1.y<<" | "<<p2.x<<", "<<p2.y<< "), ";
 
 						//Draw lines connecting segment's center with image center
 						dc.add(line_abs);
@@ -190,7 +207,6 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 					}
 
 				}
-				cout << endl;
 
 				//Add segment to image's vector of blocks
 				active_blocks.push_back(si.segments[i]);
@@ -297,4 +313,5 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 	LOG(LTRACE) << "void FindBlock_Processor::onLineSegmentsEstimated() end\n";}
 
 }
+
 }

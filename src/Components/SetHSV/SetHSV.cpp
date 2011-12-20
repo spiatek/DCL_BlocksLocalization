@@ -48,11 +48,14 @@ bool SetHSV_Processor::onInit()
 
 	newImage = registerEvent("newImage");
 	rpcResult = registerEvent("rpcResult");
+	newColor = registerEvent("newColor");
 
 	registerStream("in_img", &in_img);
 
 	registerStream("in_rpc", &in_rpc);
 	registerStream("out_rpc", &out_rpc);
+
+	registerStream("out_color", &out_color);
 
 	registerStream("out_hue", &out_hue);
 	registerStream("out_saturation", &out_saturation);
@@ -100,6 +103,7 @@ void SetHSV_Processor::onNewImage()
 	}
 	else {
 		LOG(LNOTICE) << "onNewImage(): color " << color << "\n";
+		LOG(LNOTICE) << "time: " << get_time_s() - start_time << ", timeout: " << timeout << "\n";
 	}
 
 	if(get_time_s() - start_time >= timeout) {
@@ -217,8 +221,11 @@ void SetHSV_Processor::onRpcCall()
 		br.rpcReceived = true;
 		out_rpc.write(br);
 
+		out_color.write(color);
+
 		LOG(LNOTICE) << "onRpcCall(): output message written\n";
 
+		newColor->raise();
 		rpcResult->raise();
 
 	}

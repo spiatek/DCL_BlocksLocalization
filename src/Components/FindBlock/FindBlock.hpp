@@ -27,16 +27,18 @@ struct FindBlock_Props: public Base::Props
 
 	int d;
 	int timeout;
-	int len_min;
-	int len_max;
+	int len_min, len_max;
+	int len_min_b, len_max_b;
 	string type;
 
 	void load(const ptree & pt)
 	{
 		d = pt.get("d",0.031);
 		timeout = pt.get("timeout",150);
-		len_min = pt.get("len_min",30);
-		len_max = pt.get("len_max",300);
+		len_min = pt.get("len_min",40);
+		len_max = pt.get("len_max",200);
+		len_min_b = pt.get("len_min_b",100);
+		len_max_b = pt.get("len_max_b",400);
 		type = pt.get("type","get_first");
 	}
 
@@ -46,6 +48,8 @@ struct FindBlock_Props: public Base::Props
 		pt.put("timeout", timeout);
 		pt.put("len_min", len_min);
 		pt.put("len_max", len_max);
+		pt.put("len_min_b", len_min_b);
+		pt.put("len_max_b", len_max_b);
 		pt.put("type", type);
 	}
 
@@ -95,10 +99,15 @@ protected:
         bool onStop();
 
 private:       
-		void onLineSegmentsEstimated();
+
+        void onNewColor();
+        void onLineSegmentsEstimated();
 
 		/** New image event handler. */
 		Base::EventHandler <FindBlock_Processor> h_onLineSegmentsEstimated;
+		Base::EventHandler <FindBlock_Processor> h_onNewColor;
+
+		Base::DataStreamIn <uint32_t> in_color;
 
 		/** Image stream. */
 		Base::DataStreamIn <Types::Segmentation::SegmentedImage> in_lineSegmentsEstimated;
@@ -116,6 +125,7 @@ private:
 
         double prev_gamma;
         int counter;
+        int block_color;
 
     	FindBlock_Props props;
 };

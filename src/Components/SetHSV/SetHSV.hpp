@@ -51,7 +51,7 @@ struct SetHSV_Props: public Base::Props
 		cout << "Loading properties..." << endl;
 
 		reset = pt.get("resetOption", 1);
-		timeout = pt.get("timeout", 250);
+		timeout = pt.get("timeout", 50);
 
 		boost::numeric::ublas::matrix <double> blueMatrixUblas = str2mat(pt.get <std::string> ("blue"), 3, 2);
 		blue_params = cv::Mat(3, 2, CV_32F);
@@ -183,11 +183,14 @@ protected:
 
 	Base::Event * newImage;
 	Base::Event * rpcResult;
+	Base::Event * newColor;
 
 	Base::DataStreamIn <cv::Mat, Base::DataStreamBuffer::Newest> in_img;
 
 	Base::DataStreamIn <xdr_iarchive <>, Base::DataStreamBuffer::Newest> in_rpc;
 	Base::DataStreamOut <Types::Mrrocpp_Proxy::BReading> out_rpc;
+
+	Base::DataStreamOut <uint32_t> out_color;
 
 	Base::DataStreamOut <cv::Mat> out_hue;
 	Base::DataStreamOut <cv::Mat> out_saturation;

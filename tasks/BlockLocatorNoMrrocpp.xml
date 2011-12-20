@@ -61,6 +61,13 @@
 				(200, 255)
 			)				
 		</yellow>
+		<board>
+			[3,2](
+				(30, 110),
+				(0, 255),
+				(80, 255)
+			)
+		</board>
 		<!--[3,2](
 				(40, 100),
 				(20, 255),
@@ -156,7 +163,7 @@
 	    <Event source="FindBlock.blockLocated"			destination="VisualServoIB.onObjectLocated"/>
 	    <Event source="FindBlock.blockNotFound"			destination="VisualServoIB.onObjectNotFound"/>
 	    
-	   	<Event source="NewestImage.newImage"			destination="PreviewWindow.onNewImage"/>
+	   	<Event source="MorphOpen.newImage"			destination="PreviewWindow.onNewImage"/>
 	
 	</Events>
   
@@ -233,7 +240,7 @@
 	    	<!--<in_img type="in" group="HueImage"/>-->
 	    	<!--<in_img type="in" group="SaturationImage"/>-->
 	    	<!--<in_img type="in" group="ValueImage"/>-->
-	    	<in_img type="in" group="NewestImage"/>
+	    	<in_img type="in" group="MorphOpenImage"/>
 	    	<!--<in_draw type="in" group="DrawPoints"/>-->
 	    	<in_draw type="in" group="DrawLines"/>
 	    </PreviewWindow>

@@ -32,7 +32,7 @@
     
     <ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
         <resetOption>1</resetOption>
-		<countMax>150</countMax>
+		<timeout>20</timeout>
     	<blue>
 			[3,2](
 				(5, 16),
@@ -61,6 +61,13 @@
 				(200, 255)
 			)				
 		</yellow>
+		<board>
+			[3,2](
+				(30, 110),
+				(0, 255),
+				(80, 255)
+			)
+		</board>
 		<other>
 			[3,2](
 				(80, 110),
@@ -95,6 +102,8 @@
     	<timeout>150</timeout>
 		<len_min>40</len_min>
     	<len_max>200</len_max>
+    	<len_min_b>100</len_min_b>
+    	<len_max_b>400</len_max_b>
     	<type>get_first</type>
     </FindBlock>
     
@@ -158,9 +167,11 @@
 	    <Event source="NewestImage.newImage"			destination="ColorConvertion.onNewImage"/>
 	    <Event source="ColorConvertion.newImage"		destination="ThresholdSP.onNewImage"/>
 	    <Event source="ThresholdSP.newImage"			destination="MorphClose.onNewImage"/>
+	    <Event source="ThresholdSP.newColor"			destination="FindBlock.onNewColor"/>
+	    
 	    <Event source="MorphClose.newImage"				destination="MorphOpen.onNewImage"/>
 	    <Event source="MorphOpen.newImage"				destination="Segmentation.onNewImage"/>
-	    
+	  
 	    <Event source="Segmentation.segmented"				destination="EdgeDetection.onSegmented"/>
 	    <Event source="EdgeDetection.edgesDetected"			destination="LineSegments.onEdgesDetected"/>
 	    <Event source="LineSegments.lineSegmentsEstimated"	destination="PreviewWindow.onNewImage"/>
@@ -202,6 +213,7 @@
 	    	<in_img type="in" group="ConvertedImage"/>
 	    	<in_rpc type="in" group="RpcCall"/>
 			<out_rpc type="out" group="RpcResult"/>		
+			<out_color type="out" group="Color"/>
 			<out_threshold type="out" group="ThresholdedImage"/>
 	    	<out_hue type="out" group="HueImage"/>
 	    	<out_saturation type="out" group="SaturationImage"/>
@@ -237,6 +249,7 @@
 	    
 	    <FindBlock>
 	    	<in_lineSegmentsEstimated type="in" group="LinesEstimated"/>
+	    	<in_color type="in" group="Color"/>
 	    	<!--<out_points type="out" group="DrawPoints"/>	-->
 	    	<out_lines type="out" group="DrawLines"/>
 	    	<out_imagePosition type="out" group="ImagePosition"/>
