@@ -50,7 +50,7 @@ struct SetHSV_Props: public Base::Props
 	{
 		cout << "Loading properties..." << endl;
 
-		reset = pt.get("resetOption", 1);
+		reset = pt.get("terminationOption", 1);
 		timeout = pt.get("timeout", 50);
 
 		boost::numeric::ublas::matrix <double> blueMatrixUblas = str2mat(pt.get <std::string> ("blue"), 3, 2);
@@ -108,7 +108,7 @@ struct SetHSV_Props: public Base::Props
 	 */
 	void save(ptree & pt)
 	{
-		pt.put("resetOption", reset);
+		pt.put("terminationOption", reset);
 		pt.put("timeout", timeout);
 	}
 

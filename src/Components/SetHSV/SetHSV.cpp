@@ -198,7 +198,6 @@ void SetHSV_Processor::onRpcCall()
 		LOG(LNOTICE) << "onRpcCall(): color parameter read: " << color << "\n";
 
 		if(color == BLUE) {
-			//TODO: blue block configuration modification - unable to locate block
 			params = props.blue_params;
 		}
 		else if(color == RED) {

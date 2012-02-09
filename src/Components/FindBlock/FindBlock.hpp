@@ -25,32 +25,29 @@ namespace FindBlock {
 struct FindBlock_Props: public Base::Props
 {
 
-	int d;
-	int timeout;
-	int len_min, len_max;
-	int len_min_b, len_max_b;
-	string type;
+	int max_iterations;
+	int l_min_block, l_max_block;
+	int l_min_board, l_max_board;
+	string radian_opt;
 
 	void load(const ptree & pt)
 	{
-		d = pt.get("d",0.031);
-		timeout = pt.get("timeout",150);
-		len_min = pt.get("len_min",40);
-		len_max = pt.get("len_max",200);
-		len_min_b = pt.get("len_min_b",100);
-		len_max_b = pt.get("len_max_b",400);
-		type = pt.get("type","get_first");
+		max_iterations = pt.get("max_iterations",150);
+		l_min_block = pt.get("l_min_block",40);
+		l_max_block = pt.get("l_max_block",200);
+		l_min_board = pt.get("l_min_board",100);
+		l_max_board = pt.get("l_max_board",400);
+		radian_opt = pt.get("radian_opt","nearest");
 	}
 
 	void save(ptree & pt)
 	{
-		pt.put("d", d);
-		pt.put("timeout", timeout);
-		pt.put("len_min", len_min);
-		pt.put("len_max", len_max);
-		pt.put("len_min_b", len_min_b);
-		pt.put("len_max_b", len_max_b);
-		pt.put("type", type);
+		pt.put("max_iterations", max_iterations);
+		pt.put("l_min_block", l_min_block);
+		pt.put("l_max_block", l_max_block);
+		pt.put("l_min_board", l_min_board);
+		pt.put("l_max_board", l_max_board);
+		pt.put("radian_opt", radian_opt);
 	}
 
 };

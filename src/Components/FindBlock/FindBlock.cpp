@@ -59,7 +59,7 @@ bool FindBlock_Processor::onInit()
         blockNotFound = registerEvent("blockNotFound");
 
         prev_gamma = 0;
-        counter = props.timeout+1;
+        counter = props.max_iterations + 1;
         block_color = BOARD_COLOR;
 
         return true;
@@ -98,7 +98,7 @@ void FindBlock_Processor::onNewColor()
 
 void FindBlock_Processor::onLineSegmentsEstimated()
 {
-	LOG(LTRACE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
+	//LOG(LTRACE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
 	//LOG(LNOTICE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
 
 	try {
@@ -120,28 +120,27 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 		size_t l_min, l_max;
 
 		if(block_color == BOARD_COLOR) {
-			l_min = props.len_min_b;
-			l_max = props.len_max_b;
+			l_min = props.l_min_board;
+			l_max = props.l_max_board;
 		}
 		else {
-			l_min = props.len_min;
-			l_max = props.len_max;
+			l_min = props.l_min_block;
+			l_max = props.l_max_block;
 		}
 
-		int d = props.d;
-		string type = props.type;
+		string radian_opt = props.radian_opt;
 
 		if(counter > 0) {
 			counter -= 1;
 		}
 		else {
-			counter = props.timeout;
+			counter = props.max_iterations;
 		}
 
 		//Local vectors
-		std::vector<Types::Segmentation::Segment> active_blocks;	//vector for active segments (after filtration)
-		std::vector<cv::Point> pabs_v;								//vector for segment centers
-		std::vector<double> ys;										//vector for segment rotations
+		std::vector<Types::Segmentation::Segment> active_segments;	//vector for active segments (after filtration)
+		std::vector<cv::Point> segment_centers;						//vector for segment centers
+		std::vector<double> ls_rotations;							//vector for line segment's rotations
 
 		//For each segment in segmented image
 		for(size_t i = 0; i < si.segments.size(); ++i) {
@@ -172,8 +171,9 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 					sum_y += (p1.y + p2.y);
 				}
 
-
 			}
+
+			LOG(LNOTICE) << indexes.size() << ", " << wo;
 
 			//Get only segments consisted of four lines
 			if(indexes.size() == 4 && wo == 0)
@@ -182,6 +182,8 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 				//Compute segment's center coordinates
 				cv::Point* pos_abs = new cv::Point(sum_x/(2*indexes.size()),sum_y/(2*indexes.size()));
 				Types::Line* line_abs = new Types::Line(*pos_abs, *pos_centr);
+
+
 
 				for(size_t j = 0; j < lines->size(); ++j)
 				{
@@ -199,92 +201,105 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 						long double y;
 						if((p2.x > p1.x && p2.y < p1.y) || (p1.x > p2.x && p1.y < p2.y)) {
 							y = atan2((long double)(p1.y - p2.y), (long double)(p1.x - p2.x));
-							ys.push_back(y);
-							Types::Line* line = new Line((*lines)[j]);
-							ol.add(line);
 						}
-
+						else {
+							y = atan2((long double)(p1.y - p2.y), (long double)(p1.x - p2.x)) - M_PI/2;		//1nd correction
+						}
+						ls_rotations.push_back(y);
+						Types::Line* line = new Line((*lines)[j]);
+						ol.add(line);
 					}
 
 				}
 
 				//Add segment to image's vector of blocks
-				active_blocks.push_back(si.segments[i]);
+				active_segments.push_back(si.segments[i]);
 
 				//Add segment's center to vector of block centers
-				pabs_v.push_back(*pos_abs);
+				segment_centers.push_back(*pos_abs);
 			}
 		}
 
 		//Compute servo parameters
-		if(active_blocks.size() > 0) {
+		if(active_segments.size() > 0) {
 
 			double maxPixels = std::max(si.image.size().width, si.image.size().height);
 
 			//Compute average of segment rotations
-			double im_g = 0.0, lowest = M_PI, rr = M_PI, nearest = M_PI;
+			double im_g = 0.0;				//imagePosition structure parameter (segment rotation)
+			double lowest = M_PI;			//minimal difference between im_g computed in this and previous iteration
+			double nearest_prev = M_PI;		//value closest to im_g computed in previous iteration
+			double nearest_0 = M_PI;		//value closest to 0
 
-			for(size_t z = 0; z < ys.size(); ++z) {
+			for(size_t z = 0; z < ls_rotations.size(); ++z) {
 
-				double it_r, act_min = M_PI, nearest_0 = M_PI, act_gamma;
+				double act_r;				//potential corrected radian value (between -PI and PI)
+				double it_r; 				//difference between act_r and previous value of im_g
+				double act_min = M_PI;		//minimum of it_r
+				double act_gamma;			//radian value closest to previous value if im_g
 
-				//LOG(LNOTICE) << "Prev gamma: " << prev_gamma << "\n";
-				//LOG(LNOTICE) << "Mozliwe wartosci kata: ";
-				for(int i = -3; i < 4; ++i) {
-					double act_r = ys[z] + i*M_PI/2;
-					//LOG(LNOTICE) << act_r << " ";
+				for(int i = -2; i < 2; ++i) {			//get one of radian values between -PI and PI
+					act_r = ls_rotations[z] + i*M_PI/2;
 					it_r = abs(act_r - prev_gamma);
 					if(it_r < act_min) {
 						act_min = it_r;
 						act_gamma = act_r;
 					}
-					if(abs(act_r) < nearest) {
-						nearest = act_r;
+					if(abs(act_r) < nearest_0) {
+						nearest_0 = act_r;
 					}
 				}
-				//LOG(LNOTICE) << "\n";
 
-				ys[z] = act_gamma;
+				ls_rotations[z] = act_gamma;		//fill ls_rotations[z] with value closest to prev_gamma (2nd correction)
 
 				if(act_min < lowest) {
 					lowest = act_min;
-					rr = act_gamma;
+					nearest_prev = act_gamma;
 				}
 			}
 
-			if(ys.size() > 0) {
+			if(ls_rotations.size() >= 4) {
 
-				if(counter == props.timeout+1) {
-					im_g = nearest;
+				//first iteration detection
+				if(counter == props.max_iterations + 1) {
+					im_g = nearest_0;
 				}
+
+				//take avarage twice corrected radian value from first segment
+				else if(radian_opt == "average") {
+					im_g = (ls_rotations[0] + ls_rotations[1] + ls_rotations[2] + ls_rotations[3])/4;
+				}
+
+				//take value closest to prev_gamma
 				else {
-					im_g = rr;
+					im_g = nearest_prev;
 				}
-				prev_gamma = im_g;
 
+				prev_gamma = im_g;
 			}
 			//cout << im_g << endl;
 
 			//Compute distance between block and camera
-			double im_z = C + A/(B + d);
+			//double im_z = C + A/(B + d);
 
 			//Compute servo X, Y parameters
 			int im_x = 0, im_y = 0;
-			if(type == "average") {		//compute average
+/*			if(type == "average") {		//compute average
 				int sumx = 0, sumy = 0;
-				for(size_t z = 0; z < pabs_v.size(); ++z) {
-					sumx += pabs_v[z].x - pos_centr->x;
-					sumy += pabs_v[z].y - pos_centr->y;
+				for(size_t z = 0; z < segment_centers.size(); ++z) {
+					sumx += segment_centers[z].x - pos_centr->x;
+					sumy += segment_centers[z].y - pos_centr->y;
 				}
-				if(pabs_v.size() > 0) {
-					im_x = sumx/pabs_v.size();
-					im_y = sumy/pabs_v.size();
+				if(segment_centers.size() > 0) {
+					im_x = sumx/segment_centers.size();
+					im_y = sumy/segment_centers.size();
 				}
 			}
-			else if(pabs_v.size() > 0)	//get first segment
+			else */
+			if(segment_centers.size() > 0)	//get first segment
 			{
-				im_x = pabs_v[0].x - pos_centr->x;
-				im_y = pabs_v[0].y - pos_centr->y;
+				im_x = segment_centers[0].x - pos_centr->x;
+				im_y = segment_centers[0].y - pos_centr->y;
 			}
 			//cout << im_x/maxPixels << ", " << im_y/maxPixels << endl;
 
