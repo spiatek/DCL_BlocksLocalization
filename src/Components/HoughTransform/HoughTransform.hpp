@@ -24,11 +24,12 @@ namespace HoughTransform {
 
 struct HoughTransform_Props: public Base::Props
 {
-	int threshold;
+	int type, threshold;
 	double rho, theta, srn, stn;
 
 	void load(const ptree & pt)
 	{
+		type = pt.get("type",0);
 		threshold = pt.get("threshold",100);
 		rho = pt.get("rho",1);
 		theta = pt.get("theta",1);
@@ -38,6 +39,7 @@ struct HoughTransform_Props: public Base::Props
 
 	void save(ptree & pt)
 	{
+		pt.put("type", type);
 		pt.put("threshold", threshold);
 		pt.put("rho", rho);
 		pt.put("theta", theta);
@@ -102,6 +104,7 @@ private:
 
 		/** Position stream. */
 		Base::DataStreamOut <cv::Mat> out_lines;
+		Base::DataStreamOut < vector<cv::Vec4i> > out_linesVector;
 
         /** Raised when block has been located on the image. */
         Base::Event* linesFound;

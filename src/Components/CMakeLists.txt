@@ -3,3 +3,5 @@
 ADD_COMPONENT(FindBlock)
 ADD_COMPONENT(SetHSV)
 ADD_COMPONENT(CannyFilter)
+ADD_COMPONENT(HoughTransform)
+ADD_COMPONENT(ExtractColor)

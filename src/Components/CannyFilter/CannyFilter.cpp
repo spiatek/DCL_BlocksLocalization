@@ -74,7 +74,7 @@ void CannyFilter_Processor::onNewImage()
 	image = in_img.read();
 	cv::cvtColor(image, grayImage, CV_BGR2GRAY);
 
-	cv::Canny(grayImage, edges, props.threshold1, props.threshold2);
+	cv::Canny(grayImage, edges, props.threshold1, props.threshold2, 3);
 
 	out_edges.write(edges);
 	edgesFound->raise();

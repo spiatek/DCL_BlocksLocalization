@@ -95,6 +95,8 @@ bool SetHSV_Processor::onStart()
 void SetHSV_Processor::onNewImage()
 {
 
+	LOG(LNOTICE) << "onNewImage()\n";
+
 	if(do_reset && condition_met) {
 		return;
 	}
@@ -111,6 +113,8 @@ void SetHSV_Processor::onNewImage()
 		color = UNLOADED;
 		LOG(LNOTICE) << "Timeout condition met" << "\n";
 	}
+
+	LOG(LNOTICE) << "onNewImage()\n";
 
 	try {
 
@@ -162,7 +166,7 @@ void SetHSV_Processor::onNewImage()
 		out_value.write(value_img);
 		out_threshold.write(threshold_img);
 
-		//LOG(LNOTICE) << "onNewImage(): end\n";
+		LOG(LNOTICE) << "onNewImage(): end\n";
 
 		newImage->raise();
 	}
