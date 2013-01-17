@@ -1,12 +1,14 @@
 /*
  * ExtractColor.hpp
  *
- *  Created on: 16-01-2012
+ *  Created on: 16-01-2013
  *      Author: spiatek
  */
 
 #ifndef EXTRACTCOLOR_PROCESSOR_HPP_
 #define EXTRACTCOLOR_PROCESSOR_HPP_
+
+#include <cv.h>
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -14,37 +16,34 @@
 #include "DataStream.hpp"
 #include "Props.hpp"
 
-#include "Types/SegmentedImage.hpp"
-#include "Types/DrawableContainer.hpp"
-#include "Types/Drawable.hpp"
-#include "Types/ImagePosition.hpp"
-
 namespace Processors {
 namespace ExtractColor {
 
 struct ExtractColor_Props: public Base::Props
 {
-	int type, threshold;
-	double rho, theta, srn, stn;
+	cv::Mat rgb_ranges;
 
 	void load(const ptree & pt)
 	{
-		type = pt.get("type",0);
+		boost::numeric::ublas::matrix <double> rgbMatrixUblas = str2mat(pt.get <std::string> ("ranges"), 3, 2);
+		rgb_ranges = cv::Mat(3, 2, CV_32F);
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				rgb_ranges.at <float> (i, j) = rgbMatrixUblas(i, j);
+			}
+		}
+
+		/*type = pt.get("type",0);
 		threshold = pt.get("threshold",100);
 		rho = pt.get("rho",1);
 		theta = pt.get("theta",1);
 		srn = pt.get("srn",0);
-		stn = pt.get("stn",0);
+		stn = pt.get("stn",0);*/
 	}
 
 	void save(ptree & pt)
 	{
-		pt.put("type", type);
-		pt.put("threshold", threshold);
-		pt.put("rho", rho);
-		pt.put("theta", theta);
-		pt.put("srn", srn);
-		pt.put("stn", stn);
+		//pt.put("type", type);
 	}
 
 };
@@ -100,14 +99,13 @@ private:
 		Base::EventHandler <ExtractColor_Processor> h_onNewImage;
 		
 		/** Image stream. */
-		Base::DataStreamIn <cv::Mat> in_img;
+		Base::DataStreamIn <cv::Mat, Base::DataStreamBuffer::Newest> in_img;
 
 		/** Position stream. */
-		Base::DataStreamOut <cv::Mat> out_lines;
-		Base::DataStreamOut < vector<cv::Vec4i> > out_linesVector;
+		Base::DataStreamOut <cv::Mat> out_threshold;
 
         /** Raised when block has been located on the image. */
-        Base::Event* linesFound;
+        Base::Event* newImage;
 
     	ExtractColor_Props props;
 };

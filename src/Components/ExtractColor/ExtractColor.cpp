@@ -15,9 +15,6 @@
 namespace Processors {
 namespace ExtractColor {
 
-using namespace Types;
-using Types::Segmentation::SegmentedImage;
-
 ExtractColor_Processor::ExtractColor_Processor(const std::string & name) :
         Base::Component(name)
 {
@@ -37,11 +34,9 @@ bool ExtractColor_Processor::onInit()
         registerHandler("onNewImage", &h_onNewImage);
 
         registerStream("in_img", &in_img);
+        registerStream("out_threshold", &out_threshold);
 
-        registerStream("out_lines", &out_lines);
-        registerStream("out_linesVector", &out_linesVector);
-
-        linesFound = registerEvent("linesFound");
+        newImage = registerEvent("newImage");
 
         return true;
 }
@@ -49,7 +44,6 @@ bool ExtractColor_Processor::onInit()
 bool ExtractColor_Processor::onFinish()
 {
         LOG(LTRACE) << "ExtractColor_Processor::finish\n";
-
         return true;
 }
 
@@ -71,43 +65,56 @@ bool ExtractColor_Processor::onStart()
 
 void ExtractColor_Processor::onNewImage()
 {
-	cv::Mat image, bgrImage;
+	cv::Mat image, thresholdedImage;
+	cv::Mat rImg, gImg, bImg;
+
 	image = in_img.read();
+	cv::Size img_size = image.size();
 
-	cvtColor(image, bgrImage, CV_GRAY2BGR);
+	cv::Mat ranges = props.rgb_ranges;
 
-	if(props.type == 0) {
-		vector<cv::Vec2f> lines;
-		HoughLines(image, lines, props.rho, props.theta*CV_PI/180, props.threshold, props.srn, props.stn);
+	rImg.create(img_size, CV_8UC1);
+	gImg.create(img_size, CV_8UC1);
+	bImg.create(img_size, CV_8UC1);
+	thresholdedImage.create(img_size, CV_8UC1);
 
-		LOG(LTRACE) << "Number of lines " << lines.size() << "\n";
-
-		for(size_t i = 0; i < lines.size(); i++)
-		{
-			float rho = lines[i][0], theta = lines[i][1];
-			cv::Point pt1, pt2;
-			double a = cos(theta), b = sin(theta);
-			double x0 = a*rho, y0 = b*rho;
-			pt1.x = cvRound(x0 + 1000*(-b));
-			pt1.y = cvRound(y0 + 1000*(a));
-			pt2.x = cvRound(x0 - 1000*(-b));
-			pt2.y = cvRound(y0 - 1000*(a));
-			line(bgrImage, pt1, pt2, cv::Scalar(0,0,255), 1, CV_AA);
-		}
-	}
-	else if(props.type == 1) {
-		vector<cv::Vec4i> lines;
-		HoughLinesP(image, lines, props.rho, props.theta*CV_PI/180, props.threshold, props.srn, props.stn );
-		for( size_t i = 0; i < lines.size(); i++ )
-		{
-			cv::Vec4i l = lines[i];
-			line( bgrImage, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
-		}
-		out_linesVector.write(lines);
+	if (image.isContinuous() && rImg.isContinuous() && gImg.isContinuous()
+			&& bImg.isContinuous() && thresholdedImage.isContinuous()) {
+		img_size.width *= img_size.height;
+		img_size.height = 1;
 	}
 
-	out_lines.write(bgrImage);
-	linesFound->raise();
+	img_size.width *= 3;
+
+	for(int i = 0; i < img_size.height; i++) {
+
+		const uchar* orgp = image.ptr <uchar> (i);
+		uchar* rp = rImg.ptr <uchar> (i);
+		uchar* gp = gImg.ptr <uchar> (i);
+		uchar* bp = bImg.ptr <uchar> (i);
+		uchar* tp = thresholdedImage.ptr <uchar> (i);
+
+		int j, k;
+		for(j = 0, k = 0; j < img_size.width; j += 3, ++k)
+		{
+			rp[k] = orgp[j];
+			gp[k] = orgp[j + 1];
+			bp[k] = orgp[j + 2];
+			tp[k] = 0;
+
+			if(int(rp[k]) >= int(ranges.at<float>(0,0)) && int(rp[k]) <= int(ranges.at<float>(0,1))) {
+				if(int(gp[k]) >= int(ranges.at<float>(1,0)) && int(gp[k]) <= int(ranges.at<float>(1,1))) {
+					if(int(bp[k]) >= int(ranges.at<float>(2,0)) && int(bp[k]) <= int(ranges.at<float>(2,1))) {
+						tp[k] = 255;
+					}
+				}
+			}
+		}
+
+	}
+
+	out_threshold.write(thresholdedImage);
+	newImage->raise();
 }
 }
 
