@@ -9,12 +9,14 @@
 #define EXTRACTCOLOR_PROCESSOR_HPP_
 
 #include <cv.h>
+#include <highgui.h>
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
 #include "Panel_Empty.hpp"
 #include "DataStream.hpp"
 #include "Props.hpp"
+#include "Property.hpp"
 
 namespace Processors {
 namespace ExtractColor {
@@ -108,6 +110,14 @@ private:
         Base::Event* newImage;
 
     	ExtractColor_Props props;
+
+    	Base::Property<int> BFrom;
+    	Base::Property<int> RFrom;
+    	Base::Property<int> GFrom;
+
+    	Base::Property<int> BTo;
+    	Base::Property<int> RTo;
+    	Base::Property<int> GTo;
 };
 }
 }

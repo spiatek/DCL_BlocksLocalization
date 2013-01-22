@@ -16,9 +16,35 @@ namespace Processors {
 namespace ExtractColor {
 
 ExtractColor_Processor::ExtractColor_Processor(const std::string & name) :
-        Base::Component(name)
+        Base::Component(name), RFrom("R from", 40, "range"), RTo("R to", 180, "range"),
+        GFrom("G from", 15, "range"), GTo("G to", 80, "range"),
+        BFrom("B from", 0, "range"), BTo("B to", 30, "range")
 {
         LOG(LTRACE) << "Hello ExtractColor_Processor\n";
+
+    	RFrom.addConstraint("0");
+    	RFrom.addConstraint("255");
+    	registerProperty(RFrom);
+
+    	RTo.addConstraint("0");
+    	RTo.addConstraint("255");
+    	registerProperty(RTo);
+
+    	GFrom.addConstraint("0");
+    	GFrom.addConstraint("255");
+    	registerProperty(GFrom);
+
+    	GTo.addConstraint("0");
+    	GTo.addConstraint("255");
+    	registerProperty(GTo);
+
+    	BFrom.addConstraint("0");
+    	BFrom.addConstraint("255");
+    	registerProperty(BFrom);
+
+    	BTo.addConstraint("0");
+    	BTo.addConstraint("255");
+    	registerProperty(BTo);
 }
 
 ExtractColor_Processor::~ExtractColor_Processor()
@@ -109,6 +135,13 @@ void ExtractColor_Processor::onNewImage()
 					}
 				}
 			}
+			/*if(int(rp[k]) >= RFrom && int(rp[k]) <= RTo) {
+				if(int(gp[k]) >= GFrom && int(gp[k]) <= GTo) {
+					if(int(bp[k]) >= BFrom && int(bp[k]) <= BTo) {
+						tp[k] = 255;
+					}
+				}
+			}*/
 		}
 
 	}
