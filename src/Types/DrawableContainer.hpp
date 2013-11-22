@@ -11,7 +11,7 @@
 
 #include "Drawable.hpp"
 
-#include <cv.h>
+#include <opencv2/core/core.hpp>
 #include <vector>
 
 #include <boost/foreach.hpp>

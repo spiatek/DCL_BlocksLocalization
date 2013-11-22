@@ -8,7 +8,7 @@
 #ifndef SEGMENT_HPP_
 #define SEGMENT_HPP_
 
-#include <cv.h>
+#include <opencv2/core/core.hpp>
 
 #include "Types/Line.hpp"
 

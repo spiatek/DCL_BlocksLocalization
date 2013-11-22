@@ -12,44 +12,38 @@
 #include "Component.hpp"
 #include "Panel_Empty.hpp"
 #include "DataStream.hpp"
-#include "Props.hpp"
+#include "Property.hpp"
+#include "EventHandler2.hpp"
 
 #include "Types/SegmentedImage.hpp"
 #include "Types/DrawableContainer.hpp"
 #include "Types/Drawable.hpp"
 #include "Types/ImagePosition.hpp"
 
+#define	 AVERAGE	1
+#define NEAREST		2
+
 namespace Processors {
 namespace FindBlock {
 
-struct FindBlock_Props: public Base::Props
-{
-
-	int max_iterations;
-	int l_min_block, l_max_block;
-	int l_min_board, l_max_board;
-	string radian_opt;
-
-	void load(const ptree & pt)
+class FindBlockTranslator {
+public:
+	static int fromStr(const std::string & s)
 	{
-		max_iterations = pt.get("max_iterations",150);
-		l_min_block = pt.get("l_min_block",40);
-		l_max_block = pt.get("l_max_block",200);
-		l_min_board = pt.get("l_min_board",100);
-		l_max_board = pt.get("l_max_board",400);
-		radian_opt = pt.get("radian_opt","nearest");
+		if(s == "AVERAGE")		return AVERAGE;
+		if(s == "NEAREST")		return NEAREST;
+								return NEAREST;
 	}
 
-	void save(ptree & pt)
+	static std::string toStr(int t)
 	{
-		pt.put("max_iterations", max_iterations);
-		pt.put("l_min_block", l_min_block);
-		pt.put("l_max_block", l_max_block);
-		pt.put("l_min_board", l_min_board);
-		pt.put("l_max_board", l_max_board);
-		pt.put("radian_opt", radian_opt);
+		switch(t)
+		{
+			case AVERAGE:	return "AVERAGE";
+			case NEAREST:		return "NEAREST";
+			default:			return "NEAREST";
+		}
 	}
-
 };
 
 class FindBlock_Processor: public Base::Component
@@ -58,10 +52,12 @@ public:
         FindBlock_Processor(const std::string & name = "");
         virtual ~FindBlock_Processor();
 
-    	Base::Props * getProperties()
-    	{
-    		return &props;
-    	}
+        void prepareInterface();
+
+//    	Base::Props * getProperties()
+//    	{
+//    		return &props;
+//    	}
 
 protected:
 
@@ -101,8 +97,10 @@ private:
         void onLineSegmentsEstimated();
 
 		/** New image event handler. */
-		Base::EventHandler <FindBlock_Processor> h_onLineSegmentsEstimated;
-		Base::EventHandler <FindBlock_Processor> h_onNewColor;
+		//Base::EventHandler <FindBlock_Processor> h_onLineSegmentsEstimated;
+		//Base::EventHandler <FindBlock_Processor> h_onNewColor;
+		Base::EventHandler2 h_onLineSegmentsEstimated;
+		Base::EventHandler2 h_onNewColor;
 
 		Base::DataStreamIn <uint32_t> in_color;
 
@@ -115,16 +113,21 @@ private:
         Base::DataStreamOut <Types::DrawableContainer> out_lines;
 
         /** Raised when block has been located on the image. */
-        Base::Event* blockLocated;
+        //Base::Event* blockLocated;
 
         /** Raised when block has not been found on the image. */
-        Base::Event* blockNotFound;
+        //Base::Event* blockNotFound;
 
         double prev_gamma;
         int counter;
         int block_color;
 
-    	FindBlock_Props props;
+    	Base::Property<int> max_iterations;
+    	Base::Property<int> l_min_block;
+    	Base::Property<int> l_max_block;
+    	Base::Property<int> l_min_board;
+    	Base::Property<int> l_max_board;
+    	Base::Property<int, FindBlockTranslator> radian_opt;
 };
 }
 }

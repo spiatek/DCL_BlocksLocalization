@@ -7,3 +7,5 @@ install(
     DESTINATION include/Types/Mrrocpp_Proxy
     COMPONENT sdk
 )
+
+add_subdirectory(xdr)

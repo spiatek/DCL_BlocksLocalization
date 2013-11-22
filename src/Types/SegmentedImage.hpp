@@ -9,7 +9,7 @@
 #define SEGMENTEDIMAGE_HPP_
 
 #include <vector>
-#include <cv.h>
+#include <opencv2/core/core.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "Segment.hpp"

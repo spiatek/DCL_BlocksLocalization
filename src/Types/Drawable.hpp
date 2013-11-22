@@ -1,7 +1,7 @@
 #ifndef DRAWABLE_HPP_
 #define DRAWABLE_HPP_
 
-#include <cv.h>
+#include <opencv2/core/core.hpp>
 #include <iostream>
 
 namespace Types {

@@ -9,6 +9,8 @@
 #include <string>
 #include <cmath>
 
+#include <boost/bind.hpp>
+
 #include "FindBlock.hpp"
 #include "Common/Logger.hpp"
 
@@ -28,7 +30,13 @@ using namespace Types;
 using Types::Segmentation::SegmentedImage;
 
 FindBlock_Processor::FindBlock_Processor(const std::string & name) :
-        Base::Component(name)
+        Base::Component(name),
+        max_iterations("max_iterations", 150, "range"),
+        l_min_block("l_min_block", 40, "range"),
+        l_max_block("l_max_block", 200, "range"),
+        l_min_board("l_min_board", 100, "range"),
+        l_max_board("l_max_board", 400, "range"),
+        radian_opt("radian_opt", NEAREST, "combo")
 {
         LOG(LTRACE) << "Hello FindBlock_Processor\n";
 }
@@ -38,29 +46,36 @@ FindBlock_Processor::~FindBlock_Processor()
         LOG(LTRACE) << "Good bye FindBlock_Processor\n";
 }
 
+void FindBlock_Processor::prepareInterface()
+{
+    LOG(LTRACE) << "FindBlock_Processor::prepareInterface\n";
+
+    registerStream("in_color", &in_color);
+    registerStream("in_lineSegmentsEstimated", &in_lineSegmentsEstimated);
+
+    registerStream("out_imagePosition", &out_imagePosition);
+    registerStream("out_points", &out_points);
+    registerStream("out_lines", &out_lines);
+
+    h_onLineSegmentsEstimated.setup(boost::bind(&FindBlock_Processor::onLineSegmentsEstimated, this));
+    registerHandler("onLineSegmentsEstimated", &h_onLineSegmentsEstimated);
+    addDependency("onLineSegmentsEstimated", &in_lineSegmentsEstimated);
+
+    h_onNewColor.setup(boost::bind(&FindBlock_Processor::onNewColor, this));
+    registerHandler("onNewColor", &h_onNewColor);
+    addDependency("onNewColor", &in_color);
+
+    //blockLocated = registerEvent("blockLocated");
+    //blockNotFound = registerEvent("blockNotFound");
+
+    prev_gamma = 0;
+    counter = max_iterations + 1;
+    block_color = BOARD_COLOR;
+}
+
 bool FindBlock_Processor::onInit()
 {
         LOG(LTRACE) << "FindBlock_Processor::initialize\n";
-
-        h_onLineSegmentsEstimated.setup(this, &FindBlock_Processor::onLineSegmentsEstimated);
-        registerHandler("onLineSegmentsEstimated", &h_onLineSegmentsEstimated);
-
-        h_onNewColor.setup(this, &FindBlock_Processor::onNewColor);
-        registerHandler("onNewColor", &h_onNewColor);
-
-        registerStream("in_color", &in_color);
-        registerStream("in_lineSegmentsEstimated", &in_lineSegmentsEstimated);
-
-        registerStream("out_imagePosition", &out_imagePosition);
-        registerStream("out_points", &out_points);
-        registerStream("out_lines", &out_lines);
-
-        blockLocated = registerEvent("blockLocated");
-        blockNotFound = registerEvent("blockNotFound");
-
-        prev_gamma = 0;
-        counter = props.max_iterations + 1;
-        block_color = BOARD_COLOR;
 
         return true;
 }
@@ -120,21 +135,19 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 		size_t l_min, l_max;
 
 		if(block_color == BOARD_COLOR) {
-			l_min = props.l_min_board;
-			l_max = props.l_max_board;
+			l_min = l_min_board;
+			l_max = l_max_board;
 		}
 		else {
-			l_min = props.l_min_block;
-			l_max = props.l_max_block;
+			l_min = l_min_block;
+			l_max = l_max_block;
 		}
-
-		string radian_opt = props.radian_opt;
 
 		if(counter > 0) {
 			counter -= 1;
 		}
 		else {
-			counter = props.max_iterations;
+			counter = max_iterations;
 		}
 
 		//Local vectors
@@ -261,12 +274,12 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 			if(ls_rotations.size() >= 4) {
 
 				//first iteration detection
-				if(counter == props.max_iterations + 1) {
+				if(counter == max_iterations + 1) {
 					im_g = nearest_0;
 				}
 
 				//take avarage twice corrected radian value from first segment
-				else if(radian_opt == "average") {
+				else if(radian_opt == AVERAGE) {
 					im_g = (ls_rotations[0] + ls_rotations[1] + ls_rotations[2] + ls_rotations[3])/4;
 				}
 
@@ -316,10 +329,10 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 			out_points.write(dc);
 			out_lines.write(ol);
 
-			blockLocated->raise();
+			//blockLocated->raise();
 		}
 		else {
-			blockNotFound->raise();
+			//blockNotFound->raise();
 		}
 	}
 	catch (const Common::DisCODeException& e) {
