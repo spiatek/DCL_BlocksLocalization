@@ -8,10 +8,14 @@
 
 #include <time.h>
 #include <string>
+#include <sstream>
+#include <stdexcept>
 
 #include <opencv2/core/core.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
@@ -33,26 +37,33 @@ namespace SetHSV {
  * \brief SetHSV properties
  */
 
-class MatrixTranslator {
-public:
-	static int fromStr(const std::string & s)
-	{
-		cv::Mat params;
-		boost::numeric::ublas::matrix <double> matrixUblas = str2mat(s, 3, 2);
-		params = cv::Mat(3, 2, CV_32F);
-		for(int i = 0; i < 3; ++i) {
-			for(int j = 0; j < 2; ++j) {
-				params.at <float> (i, j) = matrixUblas(i, j);
-			}
-		}
-		return params;
-	}
-
-	static std::string toStr(cv::Mat t)
-	{
-		return "";
-	}
-};
+//class MatrixTranslator {
+//public:
+//	static cv::Mat fromStr(const std::string & s)
+//	{
+//		cv::Mat params;
+//		boost::numeric::ublas::matrix <double> m (3, 2);
+//
+//		stringstream ss(s);
+//		if( !(ss>>m) ){
+//			throw runtime_error("MatrixTranslator error parsing string: " + s);
+//		}
+//
+//		params = cv::Mat(3, 2, CV_32F);
+//
+//		for(int i = 0; i < 3; ++i) {
+//			for(int j = 0; j < 2; ++j) {
+//				params.at <float> (i, j) = m(i, j);
+//			}
+//		}
+//		return params;
+//	}
+//
+//	static std::string toStr(cv::Mat t)
+//	{
+//		return "";
+//	}
+//};
 
 //struct SetHSV_Props: public Base::Props
 //{
@@ -238,19 +249,55 @@ private:
 	cv::Mat value_img;
 	cv::Mat threshold_img;
 
+	cv::Mat blue_params;
+	cv::Mat green_params;
+	cv::Mat red_params;
+	cv::Mat yellow_params;
+	cv::Mat other_params;
+	cv::Mat board_params;
 	cv::Mat params;
 	uint32_t color;
 
 	Base::Property<int> reset;
 	Base::Property<int> timeout;
-	Base::Property<cv::Mat, MatrixTranslator> blue_params;
-	Base::Property<cv::Mat, MatrixTranslator> red_params;
-	Base::Property<cv::Mat, MatrixTranslator> green_params;
-	Base::Property<cv::Mat, MatrixTranslator> yellow_params;
-	Base::Property<cv::Mat, MatrixTranslator> board_params;
-	Base::Property<cv::Mat, MatrixTranslator> other_params;
+	Base::Property<int> blue_params_hue_min;
+	Base::Property<int> blue_params_hue_max;
+	Base::Property<int> green_params_hue_min;
+	Base::Property<int> green_params_hue_max;
+	Base::Property<int> red_params_hue_min;
+	Base::Property<int> red_params_hue_max;
+	Base::Property<int> yellow_params_hue_min;
+	Base::Property<int> yellow_params_hue_max;
+	Base::Property<int> board_params_hue_min;
+	Base::Property<int> board_params_hue_max;
+	Base::Property<int> other_params_hue_min;
+	Base::Property<int> other_params_hue_max;
+	Base::Property<int> blue_params_saturation_min;
+	Base::Property<int> blue_params_saturation_max;
+	Base::Property<int> green_params_saturation_min;
+	Base::Property<int> green_params_saturation_max;
+	Base::Property<int> red_params_saturation_min;
+	Base::Property<int> red_params_saturation_max;
+	Base::Property<int> yellow_params_saturation_min;
+	Base::Property<int> yellow_params_saturation_max;
+	Base::Property<int> board_params_saturation_min;
+	Base::Property<int> board_params_saturation_max;
+	Base::Property<int> other_params_saturation_min;
+	Base::Property<int> other_params_saturation_max;
+	Base::Property<int> blue_params_value_min;
+	Base::Property<int> blue_params_value_max;
+	Base::Property<int> green_params_value_min;
+	Base::Property<int> green_params_value_max;
+	Base::Property<int> red_params_value_min;
+	Base::Property<int> red_params_value_max;
+	Base::Property<int> yellow_params_value_min;
+	Base::Property<int> yellow_params_value_max;
+	Base::Property<int> board_params_value_min;
+	Base::Property<int> board_params_value_max;
+	Base::Property<int> other_params_value_min;
+	Base::Property<int> other_params_value_max;
 
-	double start_time, timeout;
+	double start_time, current_timeout;
 	bool condition_met, do_reset;
 };
 

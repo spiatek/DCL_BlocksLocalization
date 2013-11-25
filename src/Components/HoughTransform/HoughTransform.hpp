@@ -12,7 +12,8 @@
 #include "Component.hpp"
 #include "Panel_Empty.hpp"
 #include "DataStream.hpp"
-#include "Props.hpp"
+#include "Property.hpp"
+#include "EventHandler2.hpp"
 
 #include "Types/SegmentedImage.hpp"
 #include "Types/DrawableContainer.hpp"
@@ -22,43 +23,39 @@
 namespace Processors {
 namespace HoughTransform {
 
-struct HoughTransform_Props: public Base::Props
-{
-	int type, threshold;
-	double rho, theta, srn, stn;
-
-	void load(const ptree & pt)
-	{
-		type = pt.get("type",0);
-		threshold = pt.get("threshold",100);
-		rho = pt.get("rho",1);
-		theta = pt.get("theta",1);
-		srn = pt.get("srn",0);
-		stn = pt.get("stn",0);
-	}
-
-	void save(ptree & pt)
-	{
-		pt.put("type", type);
-		pt.put("threshold", threshold);
-		pt.put("rho", rho);
-		pt.put("theta", theta);
-		pt.put("srn", srn);
-		pt.put("stn", stn);
-	}
-
-};
+//struct HoughTransform_Props: public Base::Props
+//{
+//	int type, threshold;
+//	double rho, theta, srn, stn;
+//
+//	void load(const ptree & pt)
+//	{
+//		type = pt.get("type",0);
+//		threshold = pt.get("threshold",100);
+//		rho = pt.get("rho",1);
+//		theta = pt.get("theta",1);
+//		srn = pt.get("srn",0);
+//		stn = pt.get("stn",0);
+//	}
+//
+//	void save(ptree & pt)
+//	{
+//		pt.put("type", type);
+//		pt.put("threshold", threshold);
+//		pt.put("rho", rho);
+//		pt.put("theta", theta);
+//		pt.put("srn", srn);
+//		pt.put("stn", stn);
+//	}
+//
+//};
 
 class HoughTransform_Processor: public Base::Component
 {
 public:
         HoughTransform_Processor(const std::string & name = "");
         virtual ~HoughTransform_Processor();
-
-    	Base::Props * getProperties()
-    	{
-    		return &props;
-    	}
+        void prepareInterface();
 
 protected:
 
@@ -97,7 +94,7 @@ private:
         void onNewImage();
 
 		/** New image event handler. */
-		Base::EventHandler <HoughTransform_Processor> h_onNewImage;
+		Base::EventHandler2 h_onNewImage;
 		
 		/** Image stream. */
 		Base::DataStreamIn <cv::Mat> in_img;
@@ -107,9 +104,14 @@ private:
 		Base::DataStreamOut < vector<cv::Vec4i> > out_linesVector;
 
         /** Raised when block has been located on the image. */
-        Base::Event* linesFound;
+        //Base::Event* linesFound;
 
-    	HoughTransform_Props props;
+		Base::Property<int> type;
+		Base::Property<int> threshold;
+		Base::Property<double> rho;
+		Base::Property<double> theta;
+		Base::Property<double> srn;
+		Base::Property<double> stn;
 };
 }
 }

@@ -6,7 +6,7 @@
 #ifndef READING_HPP_
 #define READING_HPP_
 
-#include "Common/xdr/xdr_oarchive.hpp"
+#include "xdr/xdr_oarchive.hpp"
 
 #include "Logger.hpp"
 

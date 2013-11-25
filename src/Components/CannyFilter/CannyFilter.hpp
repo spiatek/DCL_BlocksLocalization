@@ -12,7 +12,9 @@
 #include "Component.hpp"
 #include "Panel_Empty.hpp"
 #include "DataStream.hpp"
-#include "Props.hpp"
+#include "Property.hpp"
+#include "EventHandler2.hpp"
+//#include "Props.hpp"
 
 #include "Types/SegmentedImage.hpp"
 #include "Types/DrawableContainer.hpp"
@@ -22,35 +24,31 @@
 namespace Processors {
 namespace CannyFilter {
 
-struct CannyFilter_Props: public Base::Props
-{
-
-	int threshold1, threshold2;
-
-	void load(const ptree & pt)
-	{
-		threshold1 = pt.get("threshold1",70);
-		threshold2 = pt.get("threshold2",90);
-	}
-
-	void save(ptree & pt)
-	{
-		pt.put("threshold1", threshold1);
-		pt.put("threshold2", threshold2);
-	}
-
-};
+//struct CannyFilter_Props: public Base::Props
+//{
+//
+//	int threshold1, threshold2;
+//
+//	void load(const ptree & pt)
+//	{
+//		threshold1 = pt.get("threshold1",70);
+//		threshold2 = pt.get("threshold2",90);
+//	}
+//
+//	void save(ptree & pt)
+//	{
+//		pt.put("threshold1", threshold1);
+//		pt.put("threshold2", threshold2);
+//	}
+//
+//};
 
 class CannyFilter_Processor: public Base::Component
 {
 public:
         CannyFilter_Processor(const std::string & name = "");
         virtual ~CannyFilter_Processor();
-
-    	Base::Props * getProperties()
-    	{
-    		return &props;
-    	}
+        void prepareInterface();
 
 protected:
 
@@ -88,19 +86,21 @@ private:
 
         void onNewImage();
 
-		/** New image event handler. */
-		Base::EventHandler <CannyFilter_Processor> h_onNewImage;
-		
 		/** Image stream. */
 		Base::DataStreamIn <cv::Mat> in_img;
 
 		/** Position stream. */
 		Base::DataStreamOut <cv::Mat> out_edges;
 
-        /** Raised when block has been located on the image. */
-        Base::Event* edgesFound;
+		/** New image event handler. */
+		Base::EventHandler2 h_onNewImage;
 
-    	CannyFilter_Props props;
+        /** Raised when block has been located on the image. */
+        //Base::Event* edgesFound;
+
+    	//CannyFilter_Props props;
+        Base::Property<int> threshold1;
+        Base::Property<int> threshold2;
 };
 }
 }

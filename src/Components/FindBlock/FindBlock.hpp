@@ -20,8 +20,8 @@
 #include "Types/Drawable.hpp"
 #include "Types/ImagePosition.hpp"
 
-#define	 AVERAGE	1
-#define NEAREST		2
+#define	AVERAGE	1
+#define	NEAREST	2
 
 namespace Processors {
 namespace FindBlock {
@@ -96,12 +96,6 @@ private:
         void onNewColor();
         void onLineSegmentsEstimated();
 
-		/** New image event handler. */
-		//Base::EventHandler <FindBlock_Processor> h_onLineSegmentsEstimated;
-		//Base::EventHandler <FindBlock_Processor> h_onNewColor;
-		Base::EventHandler2 h_onLineSegmentsEstimated;
-		Base::EventHandler2 h_onNewColor;
-
 		Base::DataStreamIn <uint32_t> in_color;
 
 		/** Image stream. */
@@ -109,8 +103,14 @@ private:
 
 		/** Position stream. */
 		Base::DataStreamOut <Types::ImagePosition> out_imagePosition;
-        Base::DataStreamOut <Types::DrawableContainer> out_points;
-        Base::DataStreamOut <Types::DrawableContainer> out_lines;
+        //Base::DataStreamOut <Types::DrawableContainer> out_points;
+        //Base::DataStreamOut <Types::DrawableContainer> out_lines;
+
+        /** New image event handler. */
+		//Base::EventHandler <FindBlock_Processor> h_onLineSegmentsEstimated;
+		//Base::EventHandler <FindBlock_Processor> h_onNewColor;
+		Base::EventHandler2 h_onLineSegmentsEstimated;
+		Base::EventHandler2 h_onNewColor;
 
         /** Raised when block has been located on the image. */
         //Base::Event* blockLocated;
@@ -122,12 +122,12 @@ private:
         int counter;
         int block_color;
 
+    	Base::Property<int, FindBlockTranslator> type;
     	Base::Property<int> max_iterations;
     	Base::Property<int> l_min_block;
     	Base::Property<int> l_max_block;
     	Base::Property<int> l_min_board;
     	Base::Property<int> l_max_board;
-    	Base::Property<int, FindBlockTranslator> radian_opt;
 };
 }
 }

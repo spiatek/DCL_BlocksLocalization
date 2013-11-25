@@ -13,7 +13,9 @@
 #include <time.h>
 #include <memory>
 #include <boost/thread.hpp>
-#include "Common/xdr/xdr_iarchive.hpp"
+#include "Types/Mrrocpp_Proxy/xdr/xdr_iarchive.hpp"
+
+#include <boost/bind.hpp>
 
 #include "SetHSV.hpp"
 //#include "Types/Mrrocpp_Proxy/BReading.hpp"
@@ -26,7 +28,46 @@ using namespace std;
 namespace Processors {
 namespace SetHSV {
 
-SetHSV_Processor::SetHSV_Processor(const std::string & name) : Base::Component(name)
+SetHSV_Processor::SetHSV_Processor(const std::string & name) :
+		Base::Component(name),
+		reset("terminationOption", 1, "combo"),
+		timeout("timeout", 50, "range"),
+		blue_params_hue_min("blue_params_hue_min", 0, "range"),
+		blue_params_hue_max("blue_params_hue_max", 255, "range"),
+		green_params_hue_min("green_params_hue_min", 0, "range"),
+		green_params_hue_max("green_params_hue_max", 255, "range"),
+		red_params_hue_min("red_params_hue_min", 0, "range"),
+		red_params_hue_max("red_params_hue_max", 255, "range"),
+		yellow_params_hue_min("yellow_params_hue_min", 0, "range"),
+		yellow_params_hue_max("yellow_params_hue_max", 255, "range"),
+		board_params_hue_min("board_params_hue_min", 0, "range"),
+		board_params_hue_max("board_params_hue_max", 255, "range"),
+		other_params_hue_min("other_params_hue_min", 0, "range"),
+		other_params_hue_max("other_params_hue_max", 255, "range"),
+		blue_params_saturation_min("blue_params_saturation_min", 0, "range"),
+		blue_params_saturation_max("blue_params_saturation_max", 255, "range"),
+		green_params_saturation_min("green_params_saturation_min", 0, "range"),
+		green_params_saturation_max("green_params_saturation_max", 255, "range"),
+		red_params_saturation_min("red_params_saturation_min", 0, "range"),
+		red_params_saturation_max("red_params_saturation_max", 255, "range"),
+		yellow_params_saturation_min("yellow_params_saturation_min", 0, "range"),
+		yellow_params_saturation_max("yellow_params_saturation_max", 255, "range"),
+		board_params_saturation_min("board_params_saturation_min", 0, "range"),
+		board_params_saturation_max("board_params_saturation_max", 255, "range"),
+		other_params_saturation_min("other_params_saturation_min", 0, "range"),
+		other_params_saturation_max("other_params_saturation_max", 255, "range"),
+		blue_params_value_min("blue_params_value_min", 0, "range"),
+		blue_params_value_max("blue_params_value_max", 255, "range"),
+		green_params_value_min("green_params_value_min", 0, "range"),
+		green_params_value_max("green_params_value_max", 255, "range"),
+		red_params_value_min("red_params_value_min", 0, "range"),
+		red_params_value_max("red_params_value_max", 255, "range"),
+		yellow_params_value_min("yellow_params_value_min", 0, "range"),
+		yellow_params_value_max("yellow_params_value_max", 255, "range"),
+		board_params_value_min("board_params_value_min", 0, "range"),
+		board_params_value_max("board_params_value_max", 255, "range"),
+		other_params_value_min("other_params_value_min", 0, "range"),
+		other_params_value_max("other_params_value_max", 255, "range")
 {
 	LOG(LTRACE) << "Hello SetHSV_Processor\n";
 }
@@ -36,37 +77,90 @@ SetHSV_Processor::~SetHSV_Processor()
 	LOG(LTRACE) << "Good bye SetHSV_Processor\n";
 }
 
-bool SetHSV_Processor::onInit()
+void SetHSV_Processor::prepareInterface()
 {
-	LOG(LTRACE) << "SetHSV_Processor::initialize\n";
-
-	h_onNewImage.setup(this, &SetHSV_Processor::onNewImage);
-	registerHandler("onNewImage", &h_onNewImage);
-
-	h_onRpcCall.setup(this, &SetHSV_Processor::onRpcCall);
-	registerHandler("onRpcCall", &h_onRpcCall);
-
-	newImage = registerEvent("newImage");
-	rpcResult = registerEvent("rpcResult");
-	newColor = registerEvent("newColor");
+	LOG(LTRACE) << "SetHSV_Processor::prepareInterface\n";
 
 	registerStream("in_img", &in_img);
-
 	registerStream("in_rpc", &in_rpc);
+
 	registerStream("out_rpc", &out_rpc);
-
 	registerStream("out_color", &out_color);
-
 	registerStream("out_hue", &out_hue);
 	registerStream("out_saturation", &out_saturation);
 	registerStream("out_value", &out_value);
 	registerStream("out_threshold", &out_threshold);
 
-	do_reset = (props.reset == 1) ? true : false;
-	timeout = (double) props.timeout;
+	h_onNewImage.setup(boost::bind(&SetHSV_Processor::onNewImage, this));
+	registerHandler("onNewImage", &h_onNewImage);
+	addDependency("onNewImage", &in_img);
+
+	h_onRpcCall.setup(boost::bind(&SetHSV_Processor::onRpcCall, this));
+	registerHandler("onRpcCall", &h_onRpcCall);
+	addDependency("onRpcCall", &in_rpc);
+
+	//newImage = registerEvent("newImage");
+	//rpcResult = registerEvent("rpcResult");
+	//newColor = registerEvent("newColor");
+
+	blue_params = cv::Mat(3, 2, CV_32F);
+	green_params = cv::Mat(3, 2, CV_32F);
+	red_params = cv::Mat(3, 2, CV_32F);
+	yellow_params = cv::Mat(3, 2, CV_32F);
+	board_params = cv::Mat(3, 2, CV_32F);
+	other_params = cv::Mat(3, 2, CV_32F);
+
+	blue_params.at <uint32_t> (0, 1) = blue_params_hue_min;
+	blue_params.at <uint32_t> (0, 2) = blue_params_hue_max;
+	blue_params.at <uint32_t> (1, 1) = blue_params_saturation_min;
+	blue_params.at <uint32_t> (1, 2) = blue_params_saturation_max;
+	blue_params.at <uint32_t> (2, 1) = blue_params_value_min;
+	blue_params.at <uint32_t> (2, 2) = blue_params_value_max;
+
+	green_params.at <uint32_t> (0, 1) = green_params_hue_min;
+	green_params.at <uint32_t> (0, 2) = green_params_hue_max;
+	green_params.at <uint32_t> (1, 1) = green_params_saturation_min;
+	green_params.at <uint32_t> (1, 2) = green_params_saturation_max;
+	green_params.at <uint32_t> (2, 1) = green_params_value_min;
+	green_params.at <uint32_t> (2, 2) = green_params_value_max;
+
+	red_params.at <uint32_t> (0, 1) = red_params_hue_min;
+	red_params.at <uint32_t> (0, 2) = red_params_hue_max;
+	red_params.at <uint32_t> (1, 1) = red_params_saturation_min;
+	red_params.at <uint32_t> (1, 2) = red_params_saturation_max;
+	red_params.at <uint32_t> (2, 1) = red_params_value_min;
+	red_params.at <uint32_t> (2, 2) = red_params_value_max;
+
+	yellow_params.at <uint32_t> (0, 1) = yellow_params_hue_min;
+	yellow_params.at <uint32_t> (0, 2) = yellow_params_hue_max;
+	yellow_params.at <uint32_t> (1, 1) = yellow_params_saturation_min;
+	yellow_params.at <uint32_t> (1, 2) = yellow_params_saturation_max;
+	yellow_params.at <uint32_t> (2, 1) = yellow_params_value_min;
+	yellow_params.at <uint32_t> (2, 2) = yellow_params_value_max;
+
+	board_params.at <uint32_t> (0, 1) = board_params_hue_min;
+	board_params.at <uint32_t> (0, 2) = board_params_hue_max;
+	board_params.at <uint32_t> (1, 1) = board_params_saturation_min;
+	board_params.at <uint32_t> (1, 2) = board_params_saturation_max;
+	board_params.at <uint32_t> (2, 1) = board_params_value_min;
+	board_params.at <uint32_t> (2, 2) = board_params_value_max;
+
+	other_params.at <uint32_t> (0, 1) = other_params_hue_min;
+	other_params.at <uint32_t> (0, 2) = other_params_hue_max;
+	green_params.at <uint32_t> (1, 1) = other_params_saturation_min;
+	other_params.at <uint32_t> (1, 2) = other_params_saturation_max;
+	other_params.at <uint32_t> (2, 1) = other_params_value_min;
+	other_params.at <uint32_t> (2, 2) = other_params_value_max;
+
+	do_reset = (reset == 1) ? true : false;
+	current_timeout = (double) timeout;
 	condition_met = true;
 	color = UNLOADED;
+}
 
+bool SetHSV_Processor::onInit()
+{
+	LOG(LTRACE) << "SetHSV_Processor::initialize\n";
 	return true;
 }
 
@@ -101,7 +195,7 @@ void SetHSV_Processor::onNewImage()
 		return;
 	}
 	else if(color == UNLOADED) {
-		params = props.other_params;
+		params = other_params;
 	}
 	else {
 		LOG(LNOTICE) << "onNewImage(): color " << color << "\n";
@@ -168,7 +262,7 @@ void SetHSV_Processor::onNewImage()
 
 		LOG(LNOTICE) << "onNewImage(): end\n";
 
-		newImage->raise();
+		//newImage->raise();
 	}
 	catch (Common::DisCODeException& ex) {
 		LOG(LERROR) << ex.what() << "\n";
@@ -202,19 +296,19 @@ void SetHSV_Processor::onRpcCall()
 		LOG(LNOTICE) << "onRpcCall(): color parameter read: " << color << "\n";
 
 		if(color == BLUE) {
-			params = props.blue_params;
+			params = blue_params;
 		}
 		else if(color == RED) {
-			params = props.red_params;
+			params = red_params;
 		}
 		else if(color == GREEN) {
-			params = props.green_params;
+			params = green_params;
 		}
 		else if(color == YELLOW) {
-			params = props.yellow_params;
+			params = yellow_params;
 		}
 		else if(color == BOARD) {
-			params = props.board_params;
+			params = board_params;
 		}
 		else {
 			LOG(LERROR) << "onRpcCall(): undefined color" << endl;
@@ -228,8 +322,8 @@ void SetHSV_Processor::onRpcCall()
 
 		LOG(LNOTICE) << "onRpcCall(): output message written\n";
 
-		newColor->raise();
-		rpcResult->raise();
+		//newColor->raise();
+		//rpcResult->raise();
 
 	}
 	catch (Common::DisCODeException& ex) {

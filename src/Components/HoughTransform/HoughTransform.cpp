@@ -9,6 +9,8 @@
 #include <string>
 #include <cmath>
 
+#include <boost/bind.hpp>
+
 #include "HoughTransform.hpp"
 #include "Common/Logger.hpp"
 
@@ -19,7 +21,13 @@ using namespace Types;
 using Types::Segmentation::SegmentedImage;
 
 HoughTransform_Processor::HoughTransform_Processor(const std::string & name) :
-        Base::Component(name)
+        Base::Component(name),
+        type("type", 0, "range"),
+        threshold("threshold", 100, "range"),
+        rho("rho", 1, "range"),
+        theta("theta", 1, "range"),
+        srn("srn", 0, "range"),
+        stn("stn", 0, "range")
 {
         LOG(LTRACE) << "Hello HoughTransform_Processor\n";
 }
@@ -29,19 +37,22 @@ HoughTransform_Processor::~HoughTransform_Processor()
         LOG(LTRACE) << "Good bye HoughTransform_Processor\n";
 }
 
+void HoughTransform_Processor::prepareInterface()
+{
+    LOG(LTRACE) << "HoughTransform_Processor::prepareInterface\n";
+
+    registerStream("in_img", &in_img);
+    registerStream("out_lines", &out_lines);
+    registerStream("out_linesVector", &out_linesVector);
+
+    h_onNewImage.setup(boost::bind(&HoughTransform_Processor::onNewImage, this));
+    registerHandler("onNewImage", &h_onNewImage);
+    addDependency("onNewImage", &in_img);
+}
+
 bool HoughTransform_Processor::onInit()
 {
         LOG(LTRACE) << "HoughTransform_Processor::initialize\n";
-
-        h_onNewImage.setup(this, &HoughTransform_Processor::onNewImage);
-        registerHandler("onNewImage", &h_onNewImage);
-
-        registerStream("in_img", &in_img);
-
-        registerStream("out_lines", &out_lines);
-        registerStream("out_linesVector", &out_linesVector);
-
-        linesFound = registerEvent("linesFound");
 
         return true;
 }
@@ -76,9 +87,9 @@ void HoughTransform_Processor::onNewImage()
 
 	cvtColor(image, bgrImage, CV_GRAY2BGR);
 
-	if(props.type == 0) {
+	if(type == 0) {
 		vector<cv::Vec2f> lines;
-		HoughLines(image, lines, props.rho, props.theta*CV_PI/180, props.threshold, props.srn, props.stn);
+		HoughLines(image, lines, rho, theta*CV_PI/180, threshold, srn, stn);
 
 		LOG(LTRACE) << "Number of lines " << lines.size() << "\n";
 
@@ -95,9 +106,9 @@ void HoughTransform_Processor::onNewImage()
 			line(bgrImage, pt1, pt2, cv::Scalar(0,0,255), 1, CV_AA);
 		}
 	}
-	else if(props.type == 1) {
+	else if(type == 1) {
 		vector<cv::Vec4i> lines;
-		HoughLinesP(image, lines, props.rho, props.theta*CV_PI/180, props.threshold, props.srn, props.stn );
+		HoughLinesP(image, lines, rho, theta*CV_PI/180, threshold, srn, stn );
 		for( size_t i = 0; i < lines.size(); i++ )
 		{
 			cv::Vec4i l = lines[i];
@@ -107,7 +118,7 @@ void HoughTransform_Processor::onNewImage()
 	}
 
 	out_lines.write(bgrImage);
-	linesFound->raise();
+	//linesFound->raise();
 }
 }
 

@@ -8,58 +8,53 @@
 #ifndef EXTRACTCOLOR_PROCESSOR_HPP_
 #define EXTRACTCOLOR_PROCESSOR_HPP_
 
-#include <cv.h>
-#include <highgui.h>
+#include <opencv2/core/core.hpp>
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
 #include "Panel_Empty.hpp"
 #include "DataStream.hpp"
-#include "Props.hpp"
 #include "Property.hpp"
+#include "EventHandler2.hpp"
 
 namespace Processors {
 namespace ExtractColor {
 
-struct ExtractColor_Props: public Base::Props
-{
-	cv::Mat rgb_ranges;
-
-	void load(const ptree & pt)
-	{
-		boost::numeric::ublas::matrix <double> rgbMatrixUblas = str2mat(pt.get <std::string> ("ranges"), 3, 2);
-		rgb_ranges = cv::Mat(3, 2, CV_32F);
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 2; ++j) {
-				rgb_ranges.at <float> (i, j) = rgbMatrixUblas(i, j);
-			}
-		}
-
-		/*type = pt.get("type",0);
-		threshold = pt.get("threshold",100);
-		rho = pt.get("rho",1);
-		theta = pt.get("theta",1);
-		srn = pt.get("srn",0);
-		stn = pt.get("stn",0);*/
-	}
-
-	void save(ptree & pt)
-	{
-		//pt.put("type", type);
-	}
-
-};
+//struct ExtractColor_Props: public Base::Props
+//{
+//	cv::Mat rgb_ranges;
+//
+//	void load(const ptree & pt)
+//	{
+//		boost::numeric::ublas::matrix <double> rgbMatrixUblas = str2mat(pt.get <std::string> ("ranges"), 3, 2);
+//		rgb_ranges = cv::Mat(3, 2, CV_32F);
+//		for (int i = 0; i < 3; ++i) {
+//			for (int j = 0; j < 2; ++j) {
+//				rgb_ranges.at <float> (i, j) = rgbMatrixUblas(i, j);
+//			}
+//		}
+//
+//		/*type = pt.get("type",0);
+//		threshold = pt.get("threshold",100);
+//		rho = pt.get("rho",1);
+//		theta = pt.get("theta",1);
+//		srn = pt.get("srn",0);
+//		stn = pt.get("stn",0);*/
+//	}
+//
+//	void save(ptree & pt)
+//	{
+//		//pt.put("type", type);
+//	}
+//
+//};
 
 class ExtractColor_Processor: public Base::Component
 {
 public:
         ExtractColor_Processor(const std::string & name = "");
         virtual ~ExtractColor_Processor();
-
-    	Base::Props * getProperties()
-    	{
-    		return &props;
-    	}
+        void prepareInterface();
 
 protected:
 
@@ -98,7 +93,7 @@ private:
         void onNewImage();
 
 		/** New image event handler. */
-		Base::EventHandler <ExtractColor_Processor> h_onNewImage;
+		Base::EventHandler2 h_onNewImage;
 		
 		/** Image stream. */
 		Base::DataStreamIn <cv::Mat, Base::DataStreamBuffer::Newest> in_img;
@@ -107,9 +102,7 @@ private:
 		Base::DataStreamOut <cv::Mat> out_threshold;
 
         /** Raised when block has been located on the image. */
-        Base::Event* newImage;
-
-    	ExtractColor_Props props;
+        //Base::Event* newImage;
 
     	Base::Property<int> BFrom;
     	Base::Property<int> RFrom;

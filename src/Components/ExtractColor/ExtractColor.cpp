@@ -9,6 +9,8 @@
 #include <string>
 #include <cmath>
 
+#include <boost/bind.hpp>
+
 #include "ExtractColor.hpp"
 #include "Common/Logger.hpp"
 
@@ -52,18 +54,23 @@ ExtractColor_Processor::~ExtractColor_Processor()
         LOG(LTRACE) << "Good bye ExtractColor_Processor\n";
 }
 
+void ExtractColor_Processor::prepareInterface()
+{
+    LOG(LTRACE) << "ExtractColor_Processor::prepareInterface\n";
+
+    registerStream("in_img", &in_img);
+    registerStream("out_threshold", &out_threshold);
+
+    h_onNewImage.setup(boost::bind(&ExtractColor_Processor::onNewImage, this));
+    registerHandler("onNewImage", &h_onNewImage);
+    addDependency("onNewImage", &in_img);
+
+    //newImage = registerEvent("newImage");
+}
+
 bool ExtractColor_Processor::onInit()
 {
         LOG(LTRACE) << "ExtractColor_Processor::initialize\n";
-
-        h_onNewImage.setup(this, &ExtractColor_Processor::onNewImage);
-        registerHandler("onNewImage", &h_onNewImage);
-
-        registerStream("in_img", &in_img);
-        registerStream("out_threshold", &out_threshold);
-
-        newImage = registerEvent("newImage");
-
         return true;
 }
 
@@ -97,7 +104,7 @@ void ExtractColor_Processor::onNewImage()
 	image = in_img.read();
 	cv::Size img_size = image.size();
 
-	cv::Mat ranges = props.rgb_ranges;
+	//cv::Mat ranges = props.rgb_ranges;
 
 	rImg.create(img_size, CV_8UC1);
 	gImg.create(img_size, CV_8UC1);
@@ -128,26 +135,26 @@ void ExtractColor_Processor::onNewImage()
 			bp[k] = orgp[j + 2];
 			tp[k] = 0;
 
-			if(int(rp[k]) >= int(ranges.at<float>(0,0)) && int(rp[k]) <= int(ranges.at<float>(0,1))) {
-				if(int(gp[k]) >= int(ranges.at<float>(1,0)) && int(gp[k]) <= int(ranges.at<float>(1,1))) {
-					if(int(bp[k]) >= int(ranges.at<float>(2,0)) && int(bp[k]) <= int(ranges.at<float>(2,1))) {
-						tp[k] = 255;
-					}
-				}
-			}
-			/*if(int(rp[k]) >= RFrom && int(rp[k]) <= RTo) {
+//			if(int(rp[k]) >= int(ranges.at<float>(0,0)) && int(rp[k]) <= int(ranges.at<float>(0,1))) {
+//				if(int(gp[k]) >= int(ranges.at<float>(1,0)) && int(gp[k]) <= int(ranges.at<float>(1,1))) {
+//					if(int(bp[k]) >= int(ranges.at<float>(2,0)) && int(bp[k]) <= int(ranges.at<float>(2,1))) {
+//						tp[k] = 255;
+//					}
+//				}
+//			}
+			if(int(rp[k]) >= RFrom && int(rp[k]) <= RTo) {
 				if(int(gp[k]) >= GFrom && int(gp[k]) <= GTo) {
 					if(int(bp[k]) >= BFrom && int(bp[k]) <= BTo) {
 						tp[k] = 255;
 					}
 				}
-			}*/
+			}
 		}
 
 	}
 
 	out_threshold.write(thresholdedImage);
-	newImage->raise();
+	//newImage->raise();
 }
 }
 

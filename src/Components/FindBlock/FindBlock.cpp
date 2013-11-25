@@ -31,12 +31,12 @@ using Types::Segmentation::SegmentedImage;
 
 FindBlock_Processor::FindBlock_Processor(const std::string & name) :
         Base::Component(name),
+        type("type", NEAREST, "combo"),
         max_iterations("max_iterations", 150, "range"),
         l_min_block("l_min_block", 40, "range"),
         l_max_block("l_max_block", 200, "range"),
         l_min_board("l_min_board", 100, "range"),
-        l_max_board("l_max_board", 400, "range"),
-        radian_opt("radian_opt", NEAREST, "combo")
+        l_max_board("l_max_board", 400, "range")
 {
         LOG(LTRACE) << "Hello FindBlock_Processor\n";
 }
@@ -54,8 +54,8 @@ void FindBlock_Processor::prepareInterface()
     registerStream("in_lineSegmentsEstimated", &in_lineSegmentsEstimated);
 
     registerStream("out_imagePosition", &out_imagePosition);
-    registerStream("out_points", &out_points);
-    registerStream("out_lines", &out_lines);
+    //registerStream("out_points", &out_points);
+    //registerStream("out_lines", &out_lines);
 
     h_onLineSegmentsEstimated.setup(boost::bind(&FindBlock_Processor::onLineSegmentsEstimated, this));
     registerHandler("onLineSegmentsEstimated", &h_onLineSegmentsEstimated);
@@ -279,7 +279,7 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 				}
 
 				//take avarage twice corrected radian value from first segment
-				else if(radian_opt == AVERAGE) {
+				else if(type == AVERAGE) {
 					im_g = (ls_rotations[0] + ls_rotations[1] + ls_rotations[2] + ls_rotations[3])/4;
 				}
 
@@ -326,8 +326,8 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 
 			//Prepare output data
 			out_imagePosition.write(imagePosition);
-			out_points.write(dc);
-			out_lines.write(ol);
+			//out_points.write(dc);
+			//out_lines.write(ol);
 
 			//blockLocated->raise();
 		}
