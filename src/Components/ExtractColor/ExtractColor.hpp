@@ -12,7 +12,6 @@
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
-#include "Panel_Empty.hpp"
 #include "DataStream.hpp"
 #include "Property.hpp"
 #include "EventHandler2.hpp"
@@ -118,6 +117,6 @@ private:
 /*
  * Register processor component.
  */
-REGISTER_PROCESSOR_COMPONENT("ExtractColor", Processors::ExtractColor::ExtractColor_Processor, Common::Panel_Empty)
+REGISTER_COMPONENT("ExtractColor", Processors::ExtractColor::ExtractColor_Processor)
 
 #endif /* EXTRACTCOLOR_PROCESSOR_HPP_ */

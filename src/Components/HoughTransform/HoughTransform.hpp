@@ -10,7 +10,6 @@
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
-#include "Panel_Empty.hpp"
 #include "DataStream.hpp"
 #include "Property.hpp"
 #include "EventHandler2.hpp"
@@ -119,6 +118,6 @@ private:
 /*
  * Register processor component.
  */
-REGISTER_PROCESSOR_COMPONENT("HoughTransform", Processors::HoughTransform::HoughTransform_Processor, Common::Panel_Empty)
+REGISTER_COMPONENT("HoughTransform", Processors::HoughTransform::HoughTransform_Processor)
 
 #endif /* HOUGHTRANSFORM_PROCESSOR_HPP_ */

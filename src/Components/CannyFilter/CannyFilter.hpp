@@ -10,7 +10,6 @@
 
 #include "Component_Aux.hpp"
 #include "Component.hpp"
-#include "Panel_Empty.hpp"
 #include "DataStream.hpp"
 #include "Property.hpp"
 #include "EventHandler2.hpp"
@@ -108,6 +107,6 @@ private:
 /*
  * Register processor component.
  */
-REGISTER_PROCESSOR_COMPONENT("CannyFilter", Processors::CannyFilter::CannyFilter_Processor, Common::Panel_Empty)
+REGISTER_COMPONENT("CannyFilter", Processors::CannyFilter::CannyFilter_Processor)
 
 #endif /* CANNYFILTER_PROCESSOR_HPP_ */
