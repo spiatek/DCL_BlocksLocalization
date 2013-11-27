@@ -103,7 +103,7 @@ private:
 		/** Position stream. */
 		Base::DataStreamOut <Types::ImagePosition> out_imagePosition;
         //Base::DataStreamOut <Types::DrawableContainer> out_points;
-        //Base::DataStreamOut <Types::DrawableContainer> out_lines;
+        Base::DataStreamOut <Types::DrawableContainer> out_lines;
 
         /** New image event handler. */
 		//Base::EventHandler <FindBlock_Processor> h_onLineSegmentsEstimated;

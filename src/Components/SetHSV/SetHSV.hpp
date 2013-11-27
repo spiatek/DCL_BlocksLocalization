@@ -26,6 +26,7 @@
 #include "Types/Mrrocpp_Proxy/BReading.hpp"
 #include "Types/Mrrocpp_Proxy/xdr/xdr_iarchive.hpp"
 #include "Types/Mrrocpp_Proxy/xdr/xdr_oarchive.hpp"
+#include "Types/MatrixTranslator.hpp"
 
 using namespace cv;
 
@@ -248,53 +249,17 @@ private:
 	cv::Mat value_img;
 	cv::Mat threshold_img;
 
-	cv::Mat blue_params;
-	cv::Mat green_params;
-	cv::Mat red_params;
-	cv::Mat yellow_params;
-	cv::Mat other_params;
-	cv::Mat board_params;
 	cv::Mat params;
 	uint32_t color;
 
 	Base::Property<int> reset;
 	Base::Property<int> timeout;
-	Base::Property<int> blue_params_hue_min;
-	Base::Property<int> blue_params_hue_max;
-	Base::Property<int> green_params_hue_min;
-	Base::Property<int> green_params_hue_max;
-	Base::Property<int> red_params_hue_min;
-	Base::Property<int> red_params_hue_max;
-	Base::Property<int> yellow_params_hue_min;
-	Base::Property<int> yellow_params_hue_max;
-	Base::Property<int> board_params_hue_min;
-	Base::Property<int> board_params_hue_max;
-	Base::Property<int> other_params_hue_min;
-	Base::Property<int> other_params_hue_max;
-	Base::Property<int> blue_params_saturation_min;
-	Base::Property<int> blue_params_saturation_max;
-	Base::Property<int> green_params_saturation_min;
-	Base::Property<int> green_params_saturation_max;
-	Base::Property<int> red_params_saturation_min;
-	Base::Property<int> red_params_saturation_max;
-	Base::Property<int> yellow_params_saturation_min;
-	Base::Property<int> yellow_params_saturation_max;
-	Base::Property<int> board_params_saturation_min;
-	Base::Property<int> board_params_saturation_max;
-	Base::Property<int> other_params_saturation_min;
-	Base::Property<int> other_params_saturation_max;
-	Base::Property<int> blue_params_value_min;
-	Base::Property<int> blue_params_value_max;
-	Base::Property<int> green_params_value_min;
-	Base::Property<int> green_params_value_max;
-	Base::Property<int> red_params_value_min;
-	Base::Property<int> red_params_value_max;
-	Base::Property<int> yellow_params_value_min;
-	Base::Property<int> yellow_params_value_max;
-	Base::Property<int> board_params_value_min;
-	Base::Property<int> board_params_value_max;
-	Base::Property<int> other_params_value_min;
-	Base::Property<int> other_params_value_max;
+	Base::Property<cv::Mat, Types::MatrixTranslator> blue_params;
+	Base::Property<cv::Mat, Types::MatrixTranslator> green_params;
+	Base::Property<cv::Mat, Types::MatrixTranslator> red_params;
+	Base::Property<cv::Mat, Types::MatrixTranslator> yellow_params;
+	Base::Property<cv::Mat, Types::MatrixTranslator> board_params;
+	Base::Property<cv::Mat, Types::MatrixTranslator> other_params;
 
 	double start_time, current_timeout;
 	bool condition_met, do_reset;

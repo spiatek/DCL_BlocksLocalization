@@ -39,6 +39,13 @@ FindBlock_Processor::FindBlock_Processor(const std::string & name) :
         l_max_board("l_max_board", 400, "range")
 {
         LOG(LTRACE) << "Hello FindBlock_Processor\n";
+
+        registerProperty(type);
+        registerProperty(max_iterations);
+        registerProperty(l_min_block);
+        registerProperty(l_max_block);
+        registerProperty(l_min_board);
+        registerProperty(l_max_board);
 }
 
 FindBlock_Processor::~FindBlock_Processor()
@@ -55,7 +62,7 @@ void FindBlock_Processor::prepareInterface()
 
     registerStream("out_imagePosition", &out_imagePosition);
     //registerStream("out_points", &out_points);
-    //registerStream("out_lines", &out_lines);
+    registerStream("out_lines", &out_lines);
 
     h_onLineSegmentsEstimated.setup(boost::bind(&FindBlock_Processor::onLineSegmentsEstimated, this));
     registerHandler("onLineSegmentsEstimated", &h_onLineSegmentsEstimated);
@@ -327,7 +334,7 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 			//Prepare output data
 			out_imagePosition.write(imagePosition);
 			//out_points.write(dc);
-			//out_lines.write(ol);
+			out_lines.write(ol);
 
 			//blockLocated->raise();
 		}

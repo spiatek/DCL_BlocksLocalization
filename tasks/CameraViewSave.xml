@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Task>
+	<Reference>
+		<Author>
+			<name>Szymon Piątek</name>
+			<link></link>	
+		</Author>
+		<Description>
+			<brief>CameraViewSave</brief>
+			<full>Save image from camera to file</full>	
+		</Description>
+	</Reference>
+	
+	<!-- List of components -->
+	<Subtasks>
+		<Subtask name="Processing">
+			<Executor name="Exec1" period="0.1">
+				<Component name="Source" type="CameraUniCap:CameraUniCap" priority="1" bump="0">
+				</Component>
+				<Component name="Window" type="CvBasic:CvWindow" priority="1" bump="0">			
+				</Component>
+				<Component name="Writer" type="CvBasic:CvVideoWriter" priority="2" bump="0">
+					<param name="filename">mov2.avi</param>
+					<param name="fourcc">MJPG</param>
+					<param name="width">640</param>
+					<param name="height">480</param>					
+					<param name="fps">25.0</param>
+				</Component>
+			</Executor>
+		</Subtask>
+	</Subtasks>
+
+	<!-- Data stream assignments -->
+	<DataStreams>
+		<Source name="Source.out_img">
+			<sink>Window.in_img</sink>
+			<sink>Writer.in_img</sink>
+		</Source>
+	</DataStreams>
+
+</Task>
