@@ -15,11 +15,11 @@
 	<Subtasks>
 		<Subtask name="ImageSource">
 			<Executor name="Exec1" period="0.1">
-<!--				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0"> -->
-<!--				</Component>	-->
-				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
-					<param name="filename">/home/spiatek/workspace/Discode/DisCODe/build/inst/bin/mov2.avi</param>			
+				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0"> -->
 				</Component>
+<!--			<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
+					<param name="filename">/home/spiatek/workspace/Discode/DisCODe/build/inst/bin/mov2.avi</param>			
+				</Component>		-->
 				<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
 					<param name="camera_matrix">647.07647705, 0., 383.50000000; 0., 632.76348877, 287.50000000; 0, 0, 1</param>
 					<param name="dist_coeffs">-0.51084775 0.23313555 4.50637517e-03 -6.86281081e-03 4.94365674e-03</param>
@@ -32,10 +32,10 @@
 			<Executor name="Exec2" period="0.1">
 				<Component name="NewestImage" type="VisualServoing:NewestImage" priority="1" bump="0">	
 				</Component>
-				<Component name="ColorConvertion" type="CvBasic:CvColorConv" priority="2" bump="0">
+				<Component name="ColorConvertion" type="CvBasic:CvColorConv" priority="1" bump="0">
 					<param name="type">RGB2HSV</param>			
 				</Component>
-				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="3" bump="0">
+				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="1" bump="0">
 					<param name="reset">0</param>
 					<param name="timeout">250</param>
 					<param name="blue_params">0 16; 220 255; 150 255</param>			
@@ -44,34 +44,34 @@
 					<param name="yellow_params">40 100; 20 255; 200 255</param>
 					<param name="other_params">30 110; 0 255; 80 255</param>
 					<param name="board_params">30 110; 0 255; 80 255</param>
-				</Component>mozilla
-				<Component name="CvMorphClose" type="CvBasic:CvMorphology" priority="4" bump="0">
+				</Component>
+				<Component name="CvMorphClose" type="CvBasic:CvMorphology" priority="1" bump="0">
 					<param name="type">MORPH_CLOSE</param>
 					<param name="iterations">3</param>			
 				</Component>
-				<Component name="CvMorphOpen" type="CvBasic:CvMorphology" priority="5" bump="0">
+				<Component name="CvMorphOpen" type="CvBasic:CvMorphology" priority="1" bump="0">
 					<param name="type">MORPH_OPEN</param>
 					<param name="iterations">3</param>			
 				</Component>
-				<Component name="Segmentation" type="ObjectsRecognition:GrayImageSegmentation" priority="6" bump="0">
+				<Component name="Segmentation" type="ObjectsRecognition:GrayImageSegmentation" priority="1" bump="0">
 					<param name="minSegmentArea">400</param>
 					<param name="minVariance">5e-3</param>			
 				</Component>
-				<Component name="EdgeDetection" type="ObjectsRecognition:EdgeDetectorForSegmentedImage" priority="7" bump="0">			
+				<Component name="EdgeDetection" type="ObjectsRecognition:EdgeDetectorForSegmentedImage" priority="1" bump="0">			
 				</Component>
-				<Component name="LineSegments" type="ObjectsRecognition:LineSegments" priority="8" bump="0">			
+				<Component name="LineSegments" type="ObjectsRecognition:LineSegments" priority="1" bump="0">			
 				</Component>
-				<Component name="FindBlock" type="BlocksLocalization:FindBlock" priority="9" bump="0">
+				<Component name="FindBlock" type="BlocksLocalization:FindBlock" priority="1" bump="0">
 					<param name="l_min_board">100</param>
 					<param name="l_max_board">400</param>
 					<param name="type">NEAREST</param>			
 				</Component>
-				<Component name="VisualServoIB" type="VisualServoing:VisualServoIB" priority="10" bump="0">
+				<Component name="VisualServoIB" type="VisualServoing:VisualServoIB" priority="1" bump="0">
 				</Component>
 			</Executor>		
 		</Subtask>
 		<Subtask name="Presentation">
-			<Executor name="Exec3" period="0.05">
+			<Executor name="Exec3" period="0.01">
 				<Component name="PreviewWindow" type="CvBasic:CvWindow" priority="1" bump="0">
 					<param name="title">Preview</param>	
 					<param name="count">1</param>		
@@ -93,11 +93,11 @@
 		
 		<Source name="CvUndistort.out_img">
 			<sink>NewestImage.in_img</sink>
+			<sink>PreviewWindow.in_img</sink>
 		</Source>
     
 		<Source name="NewestImage.out_img">
 			<sink>ColorConvertion.in_img</sink>
-			<sink>PreviewWindow.in_img</sink>
 		</Source>
 		
 		<Source name="ColorConvertion.out_img">

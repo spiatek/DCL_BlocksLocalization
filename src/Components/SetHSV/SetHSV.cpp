@@ -137,7 +137,7 @@ void SetHSV_Processor::onNewImage()
 		LOG(LNOTICE) << "Timeout condition met" << "\n";
 	}
 
-	LOG(LNOTICE) << "onNewImage()\n";
+	LOG(LNOTICE) << "SetHSV_Processor::onNewImage()\n";
 
 	try {
 
@@ -189,7 +189,7 @@ void SetHSV_Processor::onNewImage()
 		out_value.write(value_img);
 		out_threshold.write(threshold_img);
 
-		LOG(LNOTICE) << "onNewImage(): end\n";
+		LOG(LNOTICE) << "SetHSV_Processor::onNewImage(): end\n";
 
 		//newImage->raise();
 	}

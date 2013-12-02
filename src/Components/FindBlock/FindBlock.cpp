@@ -121,7 +121,7 @@ void FindBlock_Processor::onNewColor()
 void FindBlock_Processor::onLineSegmentsEstimated()
 {
 	//LOG(LTRACE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
-	//LOG(LNOTICE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
+	LOG(LNOTICE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
 
 	try {
 
