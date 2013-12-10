@@ -14,13 +14,13 @@
 	<!-- List of components -->
 	<Subtasks>
 		<Subtask name="ImageSource">
-			<Executor name="Exec1" period="0.1">
-<!--				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0"> 
-				</Component> -->
-				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
-					<param name="filename">/home/spiatek/workspace/Discode/DisCODe/build/inst/bin/mov2.avi</param>			
+			<Executor name="Exec1" period="0.001">
+				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0"> 
+				</Component> 
+<!--				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
+					<param name="filename">/home/spiatek/movies/mov1.avi</param>			
 				</Component>		
-				<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
+	-->			<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
 					<param name="camera_matrix">647.07647705, 0., 383.50000000; 0., 632.76348877, 287.50000000; 0, 0, 1</param>
 					<param name="dist_coeffs">-0.51084775 0.23313555 4.50637517e-03 -6.86281081e-03 4.94365674e-03</param>
 				</Component>
@@ -29,7 +29,7 @@
 			</Executor>
 		</Subtask>	
 		<Subtask name="Processing">
-			<Executor name="Exec2" period="0.1">
+			<Executor name="Exec2" period="0.01">
 				<Component name="NewestImage" type="VisualServoing:NewestImage" priority="1" bump="0">	
 				</Component>
 				<Component name="ColorConvertion" type="CvBasic:CvColorConv" priority="1" bump="0">
@@ -76,7 +76,8 @@
 		<Subtask name="Mrrocpp">
 			<Executor name="Exec3" period="0.01">
 				<Component name="Mrrocpp" type="VisualServoing:Mrrocpp" priority="1" bump="0">	
-					<param name="port">8887</param>
+					<param name="port">8868</param>
+					<param name="timeout">10.0</param>
 				</Component>
 			</Executor>	
 		</Subtask>
@@ -88,13 +89,14 @@
 				</Component>
 			</Executor>
 		</Subtask>
-		<Subtask name="VisualServoing">
-			<Executor name="Exec5" period="0.01">
+	<!--	<Subtask name="VisualServoing">
+			<Executor name="Exec5" period="0.1">
 				<Component name="MrrocppProxy" type="VisualServoing:Mrrocpp" priority="1" bump="0">		
 					<param name="port">8888</param>
+					<param name="timeout">1.0</param>
 				</Component>
 			</Executor>	
-		</Subtask>
+		</Subtask>	-->
 	</Subtasks>
   
   <!-- Data stream assignments -->
@@ -153,10 +155,10 @@
 			<sink>VisualServoIB.in_position</sink>	
 		</Source>
 		
-		<Source name="VisualServoIB.out_reading">
+<!--		<Source name="VisualServoIB.out_reading">
 			<sink>MrrocppProxy.reading</sink>	
 		</Source>
-		
+	-->	
 		<Source name="Mrrocpp.rpcParam">
 			<sink>SetHSV.in_rpc</sink>
 		</Source>

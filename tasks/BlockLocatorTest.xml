@@ -1,240 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Task>
-
-<!-- List of components -->
-<Components>
-
-	<ImageSource type="Movie" thread="ProcessingThread" group="s1">
-		<filename>/home/spiatek/workspace/DisCODe/doc/movies/mov2.avi</filename>
-	</ImageSource>
-<!--
-	<NewestImage type="NewestImage" thread="ProcessingThread" group="s1">
-	</NewestImage>
--->
-	<ColorConvertion type="CvColorConv" thread="ProcessingThread" group="s1">
-		<type>RGB2HSV</type>
-	</ColorConvertion>
-
-	<ThresholdSP type="SetHSV" thread="ProcessingThread" group="s1">
-		<resetOption>1</resetOption>
-		<timeout>40</timeout>
-		<blue>
-			[3,2](
-				(0, 16),
-				(20, 255),
-				(40, 200)
-			)
-		</blue>
-		<red>
-			[3,2](
-				(120, 180),
-				(130, 255),
-				(45, 255)
-			)
-		</red>
-		<green>
-			[3,2](
-				(45, 62),
-				(130, 255),
-				(30, 255)
-			)		
-		</green>
-		<yellow>
-			[3,2](
-				(40, 170),
-				(220, 255),
-				(200, 255)
-			)				
-		</yellow>
-		<board>
-			[3,2](
-				(30, 110),
-				(0, 255),
-				(80, 255)
-			)
-		</board>
-		<other>
-			[3,2](
-				(80, 110),
-				(20, 255),
-				(40, 255)
-			)		
-		</other>
-	</ThresholdSP>
-
-	<MorphClose type="CvMorphology" thread="ProcessingThread" group="s1">
-		<type>MORPH_CLOSE</type>
-		<iterations>3</iterations>
-	</MorphClose>
-
-	<MorphOpen type="CvMorphology" thread="ProcessingThread" group="s1">
-		<type>MORPH_OPEN</type>
-		<iterations>3</iterations>
-	</MorphOpen>
-
-	<Segmentation type="GrayImageSegmentation" thread="ProcessingThread" group="s1">
-		<minSegmentArea>400</minSegmentArea>
-		<minVariance>5e-3</minVariance>
-	</Segmentation>
-
-	<EdgeDetection type="EdgeDetectorForSegmentedImage" thread="ProcessingThread" group="s1">
-	</EdgeDetection>
-
-	<LineSegments type="LineSegments" thread="ProcessingThread" group="s1">
-	</LineSegments>
-
-	<FindBlock type="FindBlock" thread="ProcessingThread" group="s1">
-		<len_min>40</len_min>
-		<len_max>200</len_max>
-		<type>get_first</type>
-	</FindBlock>
-
-	<VisualServoIB type="VisualServoIB" thread="ProcessingThread" group="s1">
-	</VisualServoIB>
-
-	<Mrrocpp_Proxy type="Mrrocpp" thread="MrrocppProxyThread" group="s1">
-		<port>8887</port>
-	</Mrrocpp_Proxy>
-
-	<Mrrocpp type="Mrrocpp" thread="MrrocppThread" group="s1">
-		<port>8888</port>
-	</Mrrocpp>
+	<Reference>
+		<Author>
+			<name>Szymon Piątek</name>
+			<link></link>	
+		</Author>
+		<Description>
+			<brief>Block Localization</brief>
+			<full>Localize blocks in the image from camera</full>	
+		</Description>
+	</Reference>
 	
-	<PreviewWindow type="CvWindow" thread="PreviewExecutor" group="s1">
-		<title>Preview</title>
-	</PreviewWindow>
-
-</Components>
-
+	<!-- List of components -->
+	<Subtasks>
+		<Subtask name="ImageSource">
+			<Executor name="Exec1" period="0.1">
+<!--				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0">
+				</Component> -->
+				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
+					<param name="filename">/home/spiatek/workspace/Discode/DisCODe/build/inst/bin/mov2.avi</param>			
+				</Component>
+				<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
+					<param name="camera_matrix">647.07647705, 0., 383.50000000; 0., 632.76348877, 287.50000000; 0, 0, 1</param>
+					<param name="dist_coeffs">-0.51084775 0.23313555 4.50637517e-03 -6.86281081e-03 4.94365674e-03</param>
+				</Component>
+				<Component name="CvUndistort" type="CvBasic:CvUndistort" priority="3" bump="0">
+				</Component>
+			</Executor>
+		</Subtask>	
+		<Subtask name="Processing">
+			<Executor name="Exec2" period="0.1">
+				<Component name="NewestImage" type="VisualServoing:NewestImage" priority="1" bump="0">	
+				</Component>
+				<Component name="ColorConvertion" type="CvBasic:CvColorConv" priority="1" bump="0">
+					<param name="type">RGB2HSV</param>			
+				</Component>
+				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="1" bump="0">
+					<param name="reset">1</param>
+					<param name="timeout">50</param>
+					<param name="blue_params">0 16; 220 255; 150 255</param>			
+					<param name="green_params">45 62; 180 255; 100 255</param>
+					<param name="red_params">120 180; 130 255; 100 255</param>					
+					<param name="yellow_params">40 100; 20 255; 200 255</param>
+					<param name="other_params">30 110; 0 255; 80 255</param>
+					<param name="board_params">30 110; 0 255; 80 255</param>
+				</Component>
+				<Component name="CvMorphClose" type="CvBasic:CvMorphology" priority="1" bump="0">
+					<param name="type">MORPH_CLOSE</param>
+					<param name="iterations">3</param>			
+				</Component>
+				<Component name="CvMorphOpen" type="CvBasic:CvMorphology" priority="1" bump="0">
+					<param name="type">MORPH_OPEN</param>
+					<param name="iterations">3</param>			
+				</Component>
+				<Component name="Segmentation" type="ObjectsRecognition:GrayImageSegmentation" priority="1" bump="0">
+					<param name="minSegmentArea">400</param>
+					<param name="minVariance">5e-3</param>			
+				</Component>
+				<Component name="EdgeDetection" type="ObjectsRecognition:EdgeDetectorForSegmentedImage" priority="1" bump="0">			
+				</Component>
+				<Component name="LineSegments" type="ObjectsRecognition:LineSegments" priority="1" bump="0">			
+				</Component>
+				<Component name="FindBlock" type="BlocksLocalization:FindBlock" priority="1" bump="0">
+					<param name="l_min_board">100</param>
+					<param name="l_max_board">400</param>
+					<param name="max_iterations">150</param>
+					<param name="l_min_block">40</param>
+					<param name="l_max_block">200</param>
+					<param name="type">NEAREST</param>			
+				</Component>
+				<Component name="VisualServoIB" type="VisualServoing:VisualServoIB" priority="1" bump="0">
+				</Component>
+			</Executor>		
+		</Subtask>
+		<Subtask name="Presentation">
+			<Executor name="Exec3" period="0.01">
+				<Component name="PreviewWindow" type="CvBasic:CvWindow" priority="1" bump="0">
+					<param name="title">Preview</param>	
+					<param name="count">1</param>		
+				</Component>
+			</Executor>
+		</Subtask>
+		<Subtask name="Mrrocpp">
+			<Executor name="Exec4" period="0.01">
+				<Component name="Mrrocpp" type="VisualServoing:Mrrocpp" priority="1" bump="0">	
+					<param name="port">8868</param>
+					<param name="timeout">10.0</param>
+				</Component>
+			</Executor>	
+		</Subtask>
+		<Subtask name="VisualServoing">
+			<Executor name="Exec5" period="0.1">
+				<Component name="MrrocppProxy" type="VisualServoing:Mrrocpp" priority="1" bump="0">		
+					<param name="port">8888</param>
+					<param name="timeout">1.0</param>
+				</Component>
+			</Executor>	
+		</Subtask>
+	</Subtasks>
+  
+  <!-- Data stream assignments -->
+	<DataStreams>
 		
-<!-- Threads of execution -->
-<Executors>
-
-	<ProcessingThread type="continuous">
-		<main_component>ImageSource</main_component>
-	</ProcessingThread>
-
-	<MrrocppProxyThread type="continuous">
-		<main_component>Mrrocpp_Proxy</main_component>
-	</MrrocppProxyThread>
-
-	<MrrocppThread type="continuous">
-		<main_component>Mrrocpp</main_component>
-	</MrrocppThread>
-	
-	<PreviewExecutor type="periodic">
-		<main_component>PreviewWindow</main_component>
-		<interval>0.001</interval>       
-	</PreviewExecutor>
-
-</Executors>
-
-<!-- Event connections -->
-<Events>
-
-	<Event source="ImageSource.newImage"		 destination="ColorConvertion.onNewImage"/>
-	<Event source="ColorConvertion.newImage"	destination="ThresholdSP.onNewImage"/>
-	<Event source="ThresholdSP.newImage"		destination="MorphClose.onNewImage"/>
-	<Event source="MorphClose.newImage"			destination="MorphOpen.onNewImage"/>
-	<Event source="MorphOpen.newImage"			destination="Segmentation.onNewImage"/>
-
-	<Event source="Segmentation.segmented"				destination="EdgeDetection.onSegmented"/>
-	<Event source="EdgeDetection.edgesDetected"			destination="LineSegments.onEdgesDetected"/>
-	<Event source="LineSegments.lineSegmentsEstimated"	destination="PreviewWindow.onNewImage"/>
-	<Event source="LineSegments.lineSegmentsEstimated"	destination="FindBlock.onLineSegmentsEstimated"/>
-
-	<Event source="FindBlock.blockLocated"			destination="VisualServoIB.onObjectLocated"/>
-	<Event source="FindBlock.blockNotFound"			destination="VisualServoIB.onObjectNotFound"/>
-
-	<Event source="Mrrocpp_Proxy.rpcCall"		destination="ThresholdSP.onRpcCall"/>	
-	<Event source="ThresholdSP.rpcResult"		destination="Mrrocpp_Proxy.onRpcResult"/>	
-
-	<Event source="ImageSource.newImage"		destination="PreviewWindow.onNewImage"/>
-	
-</Events>
-
-
-<!-- Data stream assignments -->
-<DataStreams>
-	
-	<ImageSource>
-		<out_img type="out" group="OriginalImage"/>
-	</ImageSource>
-<!--	
-	<NewestImage>
-		<in_img type="in" group="OriginalImage"/>
-		<out_img type="out" group="NewestImage"/>
-	</NewestImage>
+		<Source name="ImageSource.out_img">
+			<sink>CvUndistort.in_img</sink>	
+		</Source>
+		
+<!--		<Source name="CameraInfo.out_camerainfo">
+			<sink>CvUndistort.in_camerainfo</sink>	
+		</Source>
 -->
 
-	<Mrrocpp_Proxy>
-		<rpcResult type="in" group="rpcResult"/>	
-		<rpcParam type="out" group="rpcCall"/>
-	</Mrrocpp_Proxy>
+		<Source name="ImageSource.out_img">
+			<sink>PreviewWindow.in_img</sink>
+			<sink>NewestImage.in_img</sink>	
+		</Source>
 
-	<Mrrocpp>
-		<reading type="in" group="reading"/>
-	</Mrrocpp>
-	
-	<ColorConvertion>
-		<in_img type="in" group="OriginalImage"/>
-		<out_img type="out" group="ConvertedImage"/>
-	</ColorConvertion>
-
-	<ThresholdSP>
-		<in_img type="in" group="ConvertedImage"/>
-		<in_rpc type="in" group="rpcCall"/>
-		<out_rpc type="out" group="rpcResult"/>
-		<out_threshold type="out" group="ThresholdedImage"/>
-		<out_hue type="out" group="HueImage"/>
-		<out_saturation type="out" group="SaturationImage"/>
-		<out_value type="out" group="ValueImage"/>
-	</ThresholdSP>
+		<Source name="CvUndistort.out_img">
+			<sink>NewestImage.in_img</sink>
+			<sink>PreviewWindow.in_img</sink>
+		</Source>
     
-	<MorphClose>
-		<in_img type="in" group="ThresholdedImage"/>
-		<out_img type="out" group="MorphCloseImage"/>
-	</MorphClose>
-
-	<MorphOpen>
-		<in_img type="in" group="MorphCloseImage"/>
-		<out_img type="out" group="MorphOpenImage"/>
-	</MorphOpen>
+		<Source name="NewestImage.out_img">
+			<sink>ColorConvertion.in_img</sink>
+		</Source>
+		
+		<Source name="ColorConvertion.out_img">
+			<sink>SetHSV.in_img</sink>
+		</Source>
+	    
+		<Source name="SetHSV.out_threshold">
+			<sink>CvMorphClose.in_img</sink>	
+		</Source>
+		
+		<Source name="SetHSV.out_rpc">
+			<sink>Mrrocpp.rpcResult</sink>	
+		</Source>
+		
+		<Source name="CvMorphClose.out_img">
+			<sink>CvMorphOpen.in_img</sink>	
+		</Source>
+		
+		<Source name="CvMorphOpen.out_img">
+			<sink>Segmentation.in_img</sink>	
+		</Source>
+		
+		<Source name="Segmentation.out_segmented">
+			<sink>EdgeDetection.in_segmented</sink>	
+		</Source>
+		
+		<Source name="EdgeDetection.out_edgesDetected">
+			<sink>LineSegments.in_edgesDetected</sink>	
+		</Source>
+		
+		<Source name="LineSegments.out_lineSegmentsEstimated">
+			<sink>FindBlock.in_lineSegmentsEstimated</sink>	
+		</Source>
+	    
+		<Source name="FindBlock.out_imagePosition">
+			<sink>VisualServoIB.in_position</sink>	
+		</Source>
+		
+		<Source name="FindBlock.out_lines">
+			<sink>PreviewWindow.in_draw</sink>	
+		</Source>
+		
+		<Source name="Mrrocpp.rpcParam">
+			<sink>SetHSV.in_rpc</sink>
+		</Source>
+		
+		<Source name="VisualServoIB.out_reading">
+			<sink>MrrocppProxy.reading</sink>	
+		</Source>	
+	</DataStreams>
 	
-	<Segmentation>
-		<in_img type="in" group="MorphOpenImage"/>
-		<out_segmented type="out" group="SegmentedImage"/>
-	</Segmentation>
-
-	<EdgeDetection>
-		<in_segmented type="in" group="SegmentedImage"/>
-		<out_edgesDetected type="out" group="EdgesDetected"/>
-	<!--	<out_contours type="out" group="DrawLines"/>		-->
-	</EdgeDetection>
-
-	<LineSegments>
-		<in_edgesDetected type="in" group="EdgesDetected"/>
-		<out_lineSegmentsEstimated type="out" group="LinesEstimated"/>
-	<!--	<out_lineSegments type="out" group="DrawLines"/>	-->
-	</LineSegments>
-
-	<FindBlock>
-		<in_lineSegmentsEstimated type="in" group="LinesEstimated"/>
-	<!--	<out_points type="out" group="DrawPoints"/>	-->
-		<out_lines type="out" group="DrawLines"/>
-		<out_imagePosition type="out" group="ImagePosition"/>
-	</FindBlock>
-
-	<VisualServoIB>
-		<in_position type="in" group="ImagePosition"/>
-		<out_reading type="out" group="reading"/>
-	</VisualServoIB>
-        
-	<PreviewWindow>
-		<in_img type="in" group="OriginalImage"/>
-	<!--	<in_draw type="in" group="DrawPoints"/>	-->
-		<in_draw type="in" group="DrawLines"/>
-	</PreviewWindow>
-
-</DataStreams>
 </Task>

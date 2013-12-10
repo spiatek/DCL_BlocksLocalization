@@ -118,7 +118,7 @@ bool SetHSV_Processor::onStart()
 void SetHSV_Processor::onNewImage()
 {
 
-	LOG(LNOTICE) << "onNewImage()\n";
+	LOG(LINFO) << "SetHSV_Processor::onNewImage()\n";
 
 	if(do_reset && condition_met) {
 		return;

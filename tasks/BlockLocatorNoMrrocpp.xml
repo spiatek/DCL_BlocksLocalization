@@ -15,11 +15,11 @@
 	<Subtasks>
 		<Subtask name="ImageSource">
 			<Executor name="Exec1" period="0.1">
-				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0"> -->
-				</Component>
-<!--			<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
+<!--				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0">
+				</Component> -->
+				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
 					<param name="filename">/home/spiatek/workspace/Discode/DisCODe/build/inst/bin/mov2.avi</param>			
-				</Component>		-->
+				</Component>
 				<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
 					<param name="camera_matrix">647.07647705, 0., 383.50000000; 0., 632.76348877, 287.50000000; 0, 0, 1</param>
 					<param name="dist_coeffs">-0.51084775 0.23313555 4.50637517e-03 -6.86281081e-03 4.94365674e-03</param>
@@ -36,8 +36,8 @@
 					<param name="type">RGB2HSV</param>			
 				</Component>
 				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="1" bump="0">
-					<param name="reset">0</param>
-					<param name="timeout">250</param>
+					<param name="reset">1</param>
+					<param name="timeout">50</param>
 					<param name="blue_params">0 16; 220 255; 150 255</param>			
 					<param name="green_params">45 62; 180 255; 100 255</param>
 					<param name="red_params">120 180; 130 255; 100 255</param>					
@@ -87,10 +87,16 @@
 			<sink>CvUndistort.in_img</sink>	
 		</Source>
 		
-		<Source name="CameraInfo.out_camerainfo">
+<!--		<Source name="CameraInfo.out_camerainfo">
 			<sink>CvUndistort.in_camerainfo</sink>	
 		</Source>
-		
+-->
+
+		<Source name="ImageSource.out_img">
+			<sink>PreviewWindow.in_img</sink>
+			<sink>NewestImage.in_img</sink>	
+		</Source>
+
 		<Source name="CvUndistort.out_img">
 			<sink>NewestImage.in_img</sink>
 			<sink>PreviewWindow.in_img</sink>
