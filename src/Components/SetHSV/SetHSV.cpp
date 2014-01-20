@@ -118,7 +118,7 @@ bool SetHSV_Processor::onStart()
 void SetHSV_Processor::onNewImage()
 {
 
-	LOG(LINFO) << "SetHSV_Processor::onNewImage()\n";
+	LOG(LTRACE) << "SetHSV_Processor::onNewImage()\n";
 
 	if(do_reset && condition_met) {
 		return;
@@ -137,7 +137,7 @@ void SetHSV_Processor::onNewImage()
 		LOG(LNOTICE) << "Timeout condition met" << "\n";
 	}
 
-	LOG(LNOTICE) << "SetHSV_Processor::onNewImage()\n";
+	LOG(LNOTICE) << "SetHSV_Processor::onNewImage()2\n";
 
 	try {
 

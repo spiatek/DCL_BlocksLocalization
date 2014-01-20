@@ -171,12 +171,15 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 			int wo = 0;					//wo = 1 if segment is too large
 
 			//For each line in segment
+			LOG(LNOTICE) << "SEGMENT";
 			for(size_t j = 0; j < lines->size(); ++j) {
 
 				//Compute length of a line
 				cv::Point p1 = ((*lines)[j]).getP1();
 				cv::Point p2 = ((*lines)[j]).getP2();
 				l_length = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+
+				LOG(LNOTICE) << "Dl: " << l_length;
 
 				//Eliminate too large segments
 				if(l_length > l_max) {
@@ -228,6 +231,8 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 						ls_rotations.push_back(y);
 						Types::Line* line = new Line((*lines)[j]);
 						ol.add(line);
+
+						LOG(LNOTICE) << "!!!!!!!!!!!!!!!!!!! LINE ADDED";
 					}
 
 				}

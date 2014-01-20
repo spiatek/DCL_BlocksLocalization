@@ -15,11 +15,11 @@
 	<Subtasks>
 		<Subtask name="ImageSource">
 			<Executor name="Exec1" period="0.1">
-<!--				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0">
-				</Component> -->
-				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
-					<param name="filename">/home/spiatek/workspace/Discode/DisCODe/build/inst/bin/mov2.avi</param>			
+				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0">
 				</Component>
+		<!--		<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
+					<param name="filename">/home/spiatek/workspace/Discode/DisCODe/build/inst/bin/mov2.avi</param>	
+				</Component>-->
 				<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
 					<param name="camera_matrix">647.07647705, 0., 383.50000000; 0., 632.76348877, 287.50000000; 0, 0, 1</param>
 					<param name="dist_coeffs">-0.51084775 0.23313555 4.50637517e-03 -6.86281081e-03 4.94365674e-03</param>
@@ -36,13 +36,13 @@
 					<param name="type">RGB2HSV</param>			
 				</Component>
 				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="1" bump="0">
-					<param name="reset">1</param>
+					<param name="reset">0</param>
 					<param name="timeout">50</param>
-					<param name="blue_params">0 16; 220 255; 150 255</param>			
-					<param name="green_params">45 62; 180 255; 100 255</param>
-					<param name="red_params">120 180; 130 255; 100 255</param>					
-					<param name="yellow_params">40 100; 20 255; 200 255</param>
-					<param name="other_params">30 110; 0 255; 80 255</param>
+					<param name="blue_params">0 16; 20 255; 20 255</param>			
+					<param name="green_params">50 62; 20 255; 20 255</param>
+					<param name="red_params">116 126; 20 255; 80 255</param>					
+					<param name="yellow_params">80 110; 0 255; 160 255</param>
+					<param name="other_params">0 16; 20 255; 20 255</param>
 					<param name="board_params">30 110; 0 255; 80 255</param>
 				</Component>
 				<Component name="CvMorphClose" type="CvBasic:CvMorphology" priority="1" bump="0">
@@ -62,8 +62,8 @@
 				<Component name="LineSegments" type="ObjectsRecognition:LineSegments" priority="1" bump="0">			
 				</Component>
 				<Component name="FindBlock" type="BlocksLocalization:FindBlock" priority="1" bump="0">
-					<param name="l_min_board">100</param>
-					<param name="l_max_board">400</param>
+					<param name="l_min_board">50</param>
+					<param name="l_max_board">200</param>
 					<param name="type">NEAREST</param>			
 				</Component>
 				<Component name="VisualServoIB" type="VisualServoing:VisualServoIB" priority="1" bump="0">
@@ -93,17 +93,16 @@
 -->
 
 		<Source name="ImageSource.out_img">
-			<sink>PreviewWindow.in_img</sink>
 			<sink>NewestImage.in_img</sink>	
 		</Source>
 
 		<Source name="CvUndistort.out_img">
 			<sink>NewestImage.in_img</sink>
-			<sink>PreviewWindow.in_img</sink>
 		</Source>
     
 		<Source name="NewestImage.out_img">
 			<sink>ColorConvertion.in_img</sink>
+			<sink>PreviewWindow.in_img</sink>
 		</Source>
 		
 		<Source name="ColorConvertion.out_img">
@@ -133,14 +132,18 @@
 		<Source name="LineSegments.out_lineSegmentsEstimated">
 			<sink>FindBlock.in_lineSegmentsEstimated</sink>	
 		</Source>
-	    
+	    				
+<!--		<Source name="LineSegments.out_lineSegments">
+			<sink>PreviewWindow.in_draw</sink>	
+		</Source>-->
+		
 		<Source name="FindBlock.out_imagePosition">
 			<sink>VisualServoIB.in_position</sink>	
 		</Source>
 		
 		<Source name="FindBlock.out_lines">
 			<sink>PreviewWindow.in_draw</sink>	
-		</Source>
+		</Source>-->
 			    
 	</DataStreams>
 	

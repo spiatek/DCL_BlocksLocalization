@@ -14,7 +14,7 @@
 	<!-- List of components -->
 	<Subtasks>
 		<Subtask name="ImageSource">
-			<Executor name="Exec1" period="0.001">
+			<Executor name="Exec1" period="0.08" type="continuous">
 				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0"> 
 				</Component> 
 <!--				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
@@ -29,74 +29,72 @@
 			</Executor>
 		</Subtask>	
 		<Subtask name="Processing">
-			<Executor name="Exec2" period="0.01">
+			<Executor name="Exec2" period="0.08" type="continuous">
 				<Component name="NewestImage" type="VisualServoing:NewestImage" priority="1" bump="0">	
 				</Component>
-				<Component name="ColorConvertion" type="CvBasic:CvColorConv" priority="1" bump="0">
+				<Component name="ColorConvertion" type="CvBasic:CvColorConv" priority="2" bump="0">
 					<param name="type">RGB2HSV</param>			
 				</Component>
-				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="1" bump="0">
+				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="3" bump="0">
 					<param name="reset">1</param>
-					<param name="timeout">20</param>
-					<param name="blue_params">5 16; 220 255; 100 255</param>			
-					<param name="green_params">42 64; 130 255; 40 255</param>
-					<param name="red_params">120 180; 130 255; 70 255</param>					
-					<param name="yellow_params">40 110; 20 255; 200 255</param>
-					<param name="other_params">5 16; 0 255; 80 255</param>
-					<param name="board_params">30 110; 220 255; 100 255</param>
+					<param name="timeout">50</param>
+					<param name="blue_params">0 16; 20 255; 20 255</param>			
+					<param name="green_params">50 62; 20 255; 20 255</param>
+					<param name="red_params">116 126; 20 255; 80 255</param>					
+					<param name="yellow_params">80 110; 0 255; 160 255</param>
+					<param name="other_params">0 16; 20 255; 20 255</param>
+					<param name="board_params">30 110; 0 255; 80 255</param>
 				</Component>
-				<Component name="CvMorphClose" type="CvBasic:CvMorphology" priority="1" bump="0">
+				<Component name="CvMorphClose" type="CvBasic:CvMorphology" priority="4" bump="0">
 					<param name="type">MORPH_CLOSE</param>
 					<param name="iterations">3</param>			
 				</Component>
-				<Component name="CvMorphOpen" type="CvBasic:CvMorphology" priority="1" bump="0">
+				<Component name="CvMorphOpen" type="CvBasic:CvMorphology" priority="5" bump="0">
 					<param name="type">MORPH_OPEN</param>
 					<param name="iterations">3</param>			
 				</Component>
-				<Component name="Segmentation" type="ObjectsRecognition:GrayImageSegmentation" priority="1" bump="0">
+				<Component name="Segmentation" type="ObjectsRecognition:GrayImageSegmentation" priority="6" bump="0">
 					<param name="minSegmentArea">400</param>
 					<param name="minVariance">5e-3</param>			
 				</Component>
-				<Component name="EdgeDetection" type="ObjectsRecognition:EdgeDetectorForSegmentedImage" priority="1" bump="0">			
+				<Component name="EdgeDetection" type="ObjectsRecognition:EdgeDetectorForSegmentedImage" priority="7" bump="0">			
 				</Component>
-				<Component name="LineSegments" type="ObjectsRecognition:LineSegments" priority="1" bump="0">			
+				<Component name="LineSegments" type="ObjectsRecognition:LineSegments" priority="8" bump="0">			
 				</Component>
-				<Component name="FindBlock" type="BlocksLocalization:FindBlock" priority="1" bump="0">
-					<param name="l_min_board">100</param>
-					<param name="l_max_board">400</param>
+				<Component name="FindBlock" type="BlocksLocalization:FindBlock" priority="9" bump="0">
+					<param name="l_min_board">50</param>
+					<param name="l_max_board">200</param>
 					<param name="max_iterations">150</param>
-					<param name="l_min_block">40</param>
+					<param name="l_min_block">50</param>
 					<param name="l_max_block">200</param>
 					<param name="type">NEAREST</param>			
 				</Component>
-				<Component name="VisualServoIB" type="VisualServoing:VisualServoIB" priority="1" bump="0">
+				<Component name="VisualServoIB" type="VisualServoing:VisualServoIB" priority="10" bump="0">
 				</Component>
 			</Executor>		
 		</Subtask>
 		<Subtask name="Mrrocpp">
-			<Executor name="Exec3" period="0.01">
+			<Executor name="Exec3" period="0.04">
 				<Component name="Mrrocpp" type="VisualServoing:Mrrocpp" priority="1" bump="0">	
-					<param name="port">8868</param>
-					<param name="timeout">10.0</param>
+					<param name="port">8887</param>
 				</Component>
 			</Executor>	
 		</Subtask>
 		<Subtask name="Presentation">
-			<Executor name="Exec4" period="0.01">
+			<Executor name="Exec4" period="0.08">
 				<Component name="PreviewWindow" type="CvBasic:CvWindow" priority="1" bump="0">
 					<param name="title">Preview</param>	
 					<param name="count">1</param>		
 				</Component>
 			</Executor>
 		</Subtask>
-	<!--	<Subtask name="VisualServoing">
-			<Executor name="Exec5" period="0.1">
+		<Subtask name="VisualServoing">
+			<Executor name="Exec5" period="0.04">
 				<Component name="MrrocppProxy" type="VisualServoing:Mrrocpp" priority="1" bump="0">		
 					<param name="port">8888</param>
-					<param name="timeout">1.0</param>
 				</Component>
 			</Executor>	
-		</Subtask>	-->
+		</Subtask>
 	</Subtasks>
   
   <!-- Data stream assignments -->
@@ -112,15 +110,15 @@
 		
 		<Source name="CvUndistort.out_img">
 			<sink>NewestImage.in_img</sink>
-			<sink>PreviewWindow.in_img</sink>
 		</Source>
     
 		<Source name="NewestImage.out_img">
 			<sink>ColorConvertion.in_img</sink>
+			<sink>PreviewWindow.in_img</sink>
 		</Source>
 		
 		<Source name="ColorConvertion.out_img">
-			<sink>SetHSV.in_img</sink>100
+			<sink>SetHSV.in_img</sink>
 		</Source>
 	    
 		<Source name="SetHSV.out_threshold">
@@ -155,10 +153,10 @@
 			<sink>VisualServoIB.in_position</sink>	
 		</Source>
 		
-<!--		<Source name="VisualServoIB.out_reading">
+		<Source name="VisualServoIB.out_reading">
 			<sink>MrrocppProxy.reading</sink>	
 		</Source>
-	-->	
+
 		<Source name="Mrrocpp.rpcParam">
 			<sink>SetHSV.in_rpc</sink>
 		</Source>
