@@ -61,7 +61,7 @@ void FindBlock_Processor::prepareInterface()
     registerStream("in_lineSegmentsEstimated", &in_lineSegmentsEstimated);
 
     registerStream("out_imagePosition", &out_imagePosition);
-    //registerStream("out_points", &out_points);
+    registerStream("out_objectNotFound", &out_objectNotFound);
     registerStream("out_lines", &out_lines);
 
     h_onLineSegmentsEstimated.setup(boost::bind(&FindBlock_Processor::onLineSegmentsEstimated, this));
@@ -121,7 +121,7 @@ void FindBlock_Processor::onNewColor()
 void FindBlock_Processor::onLineSegmentsEstimated()
 {
 	//LOG(LTRACE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
-	LOG(LNOTICE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
+	//LOG(LNOTICE) << "FindBlock_Processor::onLineSegmentsEstimated()\n";
 
 	try {
 
@@ -140,6 +140,7 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 
 		//Get filtration parameters from xml file
 		size_t l_min, l_max;
+		cv::Point p1, p2;
 
 		if(block_color == BOARD_COLOR) {
 			l_min = l_min_board;
@@ -168,73 +169,66 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 			size_t sum_x = 0, sum_y = 0, l_length = 0;
 
 			std::vector<int> indexes;	//save indexes of chosen lines
-			int wo = 0;					//wo = 1 if segment is too large
+			std::vector<double> lengths;
+			std::vector<cv::Point> p1s;
+			std::vector<cv::Point> p2s;
 
 			//For each line in segment
-			LOG(LNOTICE) << "SEGMENT";
-			for(size_t j = 0; j < lines->size(); ++j) {
-
+			//LOG(LNOTICE) << "SEGMENT";
+			size_t j = 0;
+			do {
 				//Compute length of a line
-				cv::Point p1 = ((*lines)[j]).getP1();
-				cv::Point p2 = ((*lines)[j]).getP2();
+				p1 = ((*lines)[j]).getP1();
+				p2 = ((*lines)[j]).getP2();
 				l_length = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 
-				LOG(LNOTICE) << "Dl: " << l_length;
-
-				//Eliminate too large segments
-				if(l_length > l_max) {
-					wo = 1;
-					break;
-				}
-
 				//Lines reduction
-				if(l_length < l_max && l_length > l_min) {
+				if(l_length < l_max && l_length > l_min) {		//choose lines which suit
 					indexes.push_back(j);
+					lengths.push_back(l_length);
+					p1s.push_back(p1);
+					p2s.push_back(p2);
 					sum_x += (p1.x + p2.x);
 					sum_y += (p1.y + p2.y);
 				}
-
+				++j;
 			}
+			while(j <= lines->size() && l_length < l_max);
 
-			LOG(LNOTICE) << indexes.size() << ", " << wo;
+			//LOG(LNOTICE) << indexes.size();
 
-			//Get only segments consisted of four lines
-			if(indexes.size() == 4 && wo == 0)
+			int index = -1;
+			//Get only segments consisted of four lines, eliminate too large segments
+			if(indexes.size() == 4 && l_length < l_max)
 			{
-
 				//Compute segment's center coordinates
 				cv::Point* pos_abs = new cv::Point(sum_x/(2*indexes.size()),sum_y/(2*indexes.size()));
-				Types::Line* line_abs = new Types::Line(*pos_abs, *pos_centr);
+				Types::Line* line_abs = new Types::Line(*pos_abs, *pos_centr);			//line from image center to segment center
 
-
-
-				for(size_t j = 0; j < lines->size(); ++j)
+				for(size_t j = 0; j < 4; ++j)		//check all line segments
 				{
-					//Compute line length
-					cv::Point p1 = ((*lines)[j]).getP1();
-					cv::Point p2 = ((*lines)[j]).getP2();
-					l_length = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+					index = indexes.at(j);
+					l_length = lengths.at(j);
+					p1 = p1s.at(j);
+					p2 = p2s.at(j);
 
-					if(l_length > l_min && l_length < l_max) {
+					//Draw lines connecting segment's center with image center
+					dc.add(line_abs);
 
-						//Draw lines connecting segment's center with image center
-						dc.add(line_abs);
-
-						//Compute a radian between block's contour and optic axis of a camera
-						long double y;
-						if((p2.x > p1.x && p2.y < p1.y) || (p1.x > p2.x && p1.y < p2.y)) {
-							y = atan2((long double)(p1.y - p2.y), (long double)(p1.x - p2.x));
-						}
-						else {
-							y = atan2((long double)(p1.y - p2.y), (long double)(p1.x - p2.x)) - M_PI/2;		//1nd correction
-						}
-						ls_rotations.push_back(y);
-						Types::Line* line = new Line((*lines)[j]);
-						ol.add(line);
-
-						LOG(LNOTICE) << "!!!!!!!!!!!!!!!!!!! LINE ADDED";
+					//Compute a radian between block's contour and optic axis of a camera
+					long double y;
+					if((p2.x > p1.x && p2.y < p1.y) || (p1.x > p2.x && p1.y < p2.y)) {
+						y = atan2((long double)(p1.y - p2.y), (long double)(p1.x - p2.x));
+					}
+					else {
+						y = atan2((long double)(p1.y - p2.y), (long double)(p1.x - p2.x)) - M_PI/2;		//1nd correction
 					}
 
+					ls_rotations.push_back(y);
+					Types::Line* line = new Line((*lines)[index]);
+					ol.add(line);
+
+					//LOG(LNOTICE) << "!!!!!!!!!!!!!!!!!!! LINE ADDED";
 				}
 
 				//Add segment to image's vector of blocks
@@ -344,6 +338,7 @@ void FindBlock_Processor::onLineSegmentsEstimated()
 			//blockLocated->raise();
 		}
 		else {
+			out_objectNotFound.write(true);
 			//blockNotFound->raise();
 		}
 	}

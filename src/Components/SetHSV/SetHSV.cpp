@@ -3,12 +3,15 @@
  * \brief
  */
 
-#define UNLOADED 0
-#define BLUE 1
-#define	RED	2
-#define GREEN 3
-#define YELLOW 4
-#define BOARD 5
+#define UNLOADED		0
+#define SINGLE_BLUE		1
+#define	SINGLE_RED		2
+#define SINGLE_GREEN	3
+#define SINGLE_YELLOW	4
+#define DOUBLE_BLUE		5
+#define	DOUBLE_RED		6
+#define DOUBLE_GREEN	7
+#define DOUBLE_YELLOW	8
 
 #include <time.h>
 #include <memory>
@@ -118,7 +121,7 @@ bool SetHSV_Processor::onStart()
 void SetHSV_Processor::onNewImage()
 {
 
-	LOG(LTRACE) << "SetHSV_Processor::onNewImage()\n";
+	//LOG(LTRACE) << "SetHSV_Processor::onNewImage()\n";
 
 	if(do_reset && condition_met) {
 		return;
@@ -127,17 +130,17 @@ void SetHSV_Processor::onNewImage()
 		params = other_params;
 	}
 	else {
-		LOG(LNOTICE) << "onNewImage(): color " << color << "\n";
-		LOG(LNOTICE) << "time: " << get_time_s() - start_time << ", timeout: " << timeout << "\n";
+		//LOG(LNOTICE) << "onNewImage(): color " << color << "\n";
+		//LOG(LNOTICE) << "time: " << get_time_s() - start_time << ", timeout: " << timeout << "\n";
 	}
 
 	if(get_time_s() - start_time >= timeout) {
 		condition_met = true;
 		color = UNLOADED;
-		LOG(LNOTICE) << "Timeout condition met" << "\n";
+		//LOG(LNOTICE) << "Timeout condition met" << "\n";
 	}
 
-	LOG(LNOTICE) << "SetHSV_Processor::onNewImage()2\n";
+	//LOG(LNOTICE) << "SetHSV_Processor::onNewImage()2\n";
 
 	try {
 
@@ -189,7 +192,7 @@ void SetHSV_Processor::onNewImage()
 		out_value.write(value_img);
 		out_threshold.write(threshold_img);
 
-		LOG(LNOTICE) << "SetHSV_Processor::onNewImage(): end\n";
+		//LOG(LNOTICE) << "SetHSV_Processor::onNewImage(): end\n";
 
 		//newImage->raise();
 	}
@@ -224,20 +227,17 @@ void SetHSV_Processor::onRpcCall()
 
 		LOG(LNOTICE) << "onRpcCall(): color parameter read: " << color << "\n";
 
-		if(color == BLUE) {
+		if(color == SINGLE_BLUE || color == DOUBLE_BLUE) {
 			params = blue_params;
 		}
-		else if(color == RED) {
+		else if(color == SINGLE_RED || color == DOUBLE_RED) {
 			params = red_params;
 		}
-		else if(color == GREEN) {
+		else if(color == SINGLE_GREEN || color == DOUBLE_GREEN) {
 			params = green_params;
 		}
-		else if(color == YELLOW) {
+		else if(color == SINGLE_YELLOW || color == DOUBLE_YELLOW) {
 			params = yellow_params;
-		}
-		else if(color == BOARD) {
-			params = board_params;
 		}
 		else {
 			LOG(LERROR) << "onRpcCall(): undefined color" << endl;

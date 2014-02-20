@@ -14,23 +14,22 @@
 	<!-- List of components -->
 	<Subtasks>
 		<Subtask name="ImageSource">
-			<Executor name="Exec1" period="0.08" type="continuous">
+			<Executor name="Exec1" period="0.04" type="continuous">
 				<Component name="ImageSource" type="CameraUniCap:CameraUniCap" priority="1" bump="0"> 
 				</Component> 
 <!--				<Component name="ImageSource" type="CvBasic:Movie" priority="1" bump="0">
 					<param name="filename">/home/spiatek/movies/mov1.avi</param>			
 				</Component>		
-	-->			<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
+			<Component name="CameraInfo" type="CvCoreTypes:CameraInfoProvider" priority="2" bump="0">
 					<param name="camera_matrix">647.07647705, 0., 383.50000000; 0., 632.76348877, 287.50000000; 0, 0, 1</param>
 					<param name="dist_coeffs">-0.51084775 0.23313555 4.50637517e-03 -6.86281081e-03 4.94365674e-03</param>
 				</Component>
 				<Component name="CvUndistort" type="CvBasic:CvUndistort" priority="3" bump="0">
 				</Component>
+				-->
 			</Executor>
-		</Subtask>	
-		<Subtask name="Processing">
-			<Executor name="Exec2" period="0.08" type="continuous">
-				<Component name="NewestImage" type="VisualServoing:NewestImage" priority="1" bump="0">	
+			<Executor name="Exec2" period="0.04" type="continuous">
+				<Component name="NewestImage" type="VisualServoing:NewestImage" priority="1" bump="0">
 				</Component>
 				<Component name="ColorConvertion" type="CvBasic:CvColorConv" priority="2" bump="0">
 					<param name="type">RGB2HSV</param>			
@@ -38,10 +37,10 @@
 				<Component name="SetHSV" type="BlocksLocalization:SetHSV" priority="3" bump="0">
 					<param name="reset">1</param>
 					<param name="timeout">50</param>
-					<param name="blue_params">0 16; 20 255; 20 255</param>			
-					<param name="green_params">50 62; 20 255; 20 255</param>
-					<param name="red_params">116 126; 20 255; 80 255</param>					
-					<param name="yellow_params">80 110; 0 255; 160 255</param>
+					<param name="blue_params">0 16; 20 255; 16 255</param>			
+					<param name="green_params">55 70; 120 180; 25 220</param>
+					<param name="red_params">116 126; 20 255; 60 255</param>					
+					<param name="yellow_params">102 110; 20 220; 100 255</param>
 					<param name="other_params">0 16; 20 255; 20 255</param>
 					<param name="board_params">30 110; 0 255; 80 255</param>
 				</Component>
@@ -66,7 +65,7 @@
 					<param name="l_max_board">200</param>
 					<param name="max_iterations">150</param>
 					<param name="l_min_block">50</param>
-					<param name="l_max_block">200</param>
+					<param name="l_max_block">100</param>
 					<param name="type">NEAREST</param>			
 				</Component>
 				<Component name="VisualServoIB" type="VisualServoing:VisualServoIB" priority="10" bump="0">
@@ -74,14 +73,14 @@
 			</Executor>		
 		</Subtask>
 		<Subtask name="Mrrocpp">
-			<Executor name="Exec3" period="0.04">
+			<Executor name="Exec3" period="0.02">
 				<Component name="Mrrocpp" type="VisualServoing:Mrrocpp" priority="1" bump="0">	
 					<param name="port">8887</param>
 				</Component>
 			</Executor>	
 		</Subtask>
 		<Subtask name="Presentation">
-			<Executor name="Exec4" period="0.08">
+			<Executor name="Exec4" period="0.04">
 				<Component name="PreviewWindow" type="CvBasic:CvWindow" priority="1" bump="0">
 					<param name="title">Preview</param>	
 					<param name="count">1</param>		
@@ -100,7 +99,7 @@
   <!-- Data stream assignments -->
 	<DataStreams>
 		
-		<Source name="ImageSource.out_img">
+<!--		<Source name="ImageSource.out_img">
 			<sink>CvUndistort.in_img</sink>	
 		</Source>
 		
@@ -111,10 +110,19 @@
 		<Source name="CvUndistort.out_img">
 			<sink>NewestImage.in_img</sink>
 		</Source>
-    
+		
 		<Source name="NewestImage.out_img">
 			<sink>ColorConvertion.in_img</sink>
 			<sink>PreviewWindow.in_img</sink>
+		</Source>-->
+
+		<Source name="ImageSource.out_img">
+			<sink>NewestImage.in_img</sink>
+		</Source>
+		
+		<Source name="NewestImage.out_img">
+			<sink>ColorConvertion.in_img</sink>
+			<sink>PreviewWindow.in_img</sink>	
 		</Source>
 		
 		<Source name="ColorConvertion.out_img">
@@ -148,9 +156,13 @@
 		<Source name="LineSegments.out_lineSegmentsEstimated">
 			<sink>FindBlock.in_lineSegmentsEstimated</sink>	
 		</Source>
-	    
+				
 		<Source name="FindBlock.out_imagePosition">
 			<sink>VisualServoIB.in_position</sink>	
+		</Source>
+		
+		<Source name="FindBlock.out_objectNotFound">
+			<sink>VisualServoIB.in_objectNotFound</sink>	
 		</Source>
 		
 		<Source name="VisualServoIB.out_reading">

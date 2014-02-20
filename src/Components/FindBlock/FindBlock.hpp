@@ -102,6 +102,7 @@ private:
 
 		/** Position stream. */
 		Base::DataStreamOut <Types::ImagePosition> out_imagePosition;
+		Base::DataStreamOut <bool> out_objectNotFound;
         //Base::DataStreamOut <Types::DrawableContainer> out_points;
         Base::DataStreamOut <Types::DrawableContainer> out_lines;
 
